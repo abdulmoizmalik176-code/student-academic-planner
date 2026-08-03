@@ -22,7 +22,7 @@ source.include_patterns = dist/*,dist/**/*
 version = 1.0.0
 
 # (list) Application requirements
-requirements = python3,hostpython3
+requirements = python3,kivy,android,pyjnius
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = portrait
@@ -43,7 +43,7 @@ android.minapi = 21
 android.enable_androidx = True
 
 # (list) Architectures to build for
-android.archs = arm64-v8a, armeabi-v7a
+android.archs = arm64-v8a
 
 # (bool) Accept SDK licenses automatically
 android.accept_sdk_license = True

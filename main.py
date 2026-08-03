@@ -32,16 +32,50 @@ if __name__ == "__main__":
     server_thread = threading.Thread(target=start_server, daemon=True)
     server_thread.start()
 
-    # Attempt to open native window using pywebview, otherwise open default web browser
+    launched = False
+
+    # Try Android Native WebView via Kivy & Pyjnius
     try:
-        import webview
-        print("Launching Android / Desktop WebView window...")
-        webview.create_window("Student Routine & Academic Master", f"http://localhost:{PORT}", width=420, height=840)
-        webview.start()
-    except ImportError:
-        print(f"Opening browser window at http://localhost:{PORT}...")
-        webbrowser.open(f"http://localhost:{PORT}")
+        from kivy.app import App
+        from kivy.uix.boxlayout import BoxLayout
+        from jnius import autoclass
+        from android.runnable import run_on_ui_thread
+
+        WebView = autoclass('android.webkit.WebView')
+        WebViewClient = autoclass('android.webkit.WebViewClient')
+        activity = autoclass('org.kivy.android.PythonActivity').mActivity
+
+        class AndroidApp(App):
+            def build(self):
+                self.create_webview()
+                return BoxLayout()
+
+            @run_on_ui_thread
+            def create_webview(self):
+                webview = WebView(activity)
+                webview.getSettings().setJavaScriptEnabled(True)
+                webview.getSettings().setDomStorageEnabled(True)
+                webview.getSettings().setAllowFileAccess(True)
+                webview.setWebViewClient(WebViewClient())
+                activity.setContentView(webview)
+                webview.loadUrl(f"http://127.0.0.1:{PORT}")
+
+        AndroidApp().run()
+        launched = True
+    except Exception as e:
+        print(f"Native Android WebView init skipped: {e}")
+
+    # Fallback to PyWebView or Browser if not on Android Kivy
+    if not launched:
         try:
-            server_thread.join()
-        except KeyboardInterrupt:
-            print("\nServer stopped gracefully.")
+            import webview
+            webview.create_window("Student Routine & Academic Master", f"http://localhost:{PORT}", width=420, height=840)
+            webview.start()
+        except ImportError:
+            print(f"Opening browser window at http://localhost:{PORT}...")
+            webbrowser.open(f"http://localhost:{PORT}")
+            try:
+                server_thread.join()
+            except KeyboardInterrupt:
+                print("\nServer stopped gracefully.")
+
