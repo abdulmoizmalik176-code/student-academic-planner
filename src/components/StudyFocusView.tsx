@@ -165,19 +165,19 @@ export const StudyFocusView: React.FC<StudyFocusViewProps> = ({ onAddStudyXP }) 
     <div className="space-y-6 pb-20">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black text-white flex items-center gap-2">
-            <Clock className="w-6 h-6 text-purple-400" />
+          <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <Clock className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             Study Focus Timer & Ambient Sounds
           </h2>
-          <p className="text-xs text-slate-400">YPT & Forest inspired study logger with ambient background audio</p>
+          <p className="text-xs text-slate-600 dark:text-slate-400">YPT & Forest inspired study logger with ambient background audio</p>
         </div>
 
         {/* Toggle Mode */}
-        <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
+        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <button
             onClick={() => { setTimerMode('pomodoro'); setIsRunning(false); }}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              timerMode === 'pomodoro' ? 'bg-purple-600 text-white' : 'text-slate-400'
+              timerMode === 'pomodoro' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             Pomodoro (25m)
@@ -185,7 +185,7 @@ export const StudyFocusView: React.FC<StudyFocusViewProps> = ({ onAddStudyXP }) 
           <button
             onClick={() => { setTimerMode('stopwatch'); setIsRunning(false); }}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              timerMode === 'stopwatch' ? 'bg-purple-600 text-white' : 'text-slate-400'
+              timerMode === 'stopwatch' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             Stopwatch
@@ -194,7 +194,7 @@ export const StudyFocusView: React.FC<StudyFocusViewProps> = ({ onAddStudyXP }) 
       </div>
 
       {/* Main Timer Display Card */}
-      <div className="p-8 rounded-2xl bg-gradient-to-b from-slate-900 via-purple-950/30 to-slate-900 border border-purple-900/40 text-center space-y-6 shadow-xl relative overflow-hidden">
+      <div className="p-8 rounded-2xl bg-gradient-to-b from-slate-900 via-purple-950/80 to-slate-900 border border-purple-800/40 text-center space-y-6 shadow-xl relative overflow-hidden text-white">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-semibold">
           <BookOpen className="w-3.5 h-3.5" />
           <span>Subject:</span>

@@ -103,6 +103,7 @@ export type ActiveTab =
   | 'focus' 
   | 'islamic' 
   | 'academic' 
+  | 'timetable'
   | 'ai' 
   | 'reports' 
   | 'guide';

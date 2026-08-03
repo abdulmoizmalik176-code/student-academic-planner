@@ -61,11 +61,11 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
     <div className="space-y-6 pb-20">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black text-white flex items-center gap-2">
-            <Flame className="w-6 h-6 text-amber-400 fill-amber-400" />
+          <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <Flame className="w-6 h-6 text-amber-500 dark:text-amber-400 fill-amber-500" />
             Habit Consistency & Heatmaps
           </h2>
-          <p className="text-xs text-slate-400">Build long-term study and personal discipline with daily tracking</p>
+          <p className="text-xs text-slate-600 dark:text-slate-400">Build long-term study and personal discipline with daily tracking</p>
         </div>
 
         <button
@@ -80,9 +80,9 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
       {/* Habit Cards List */}
       <div className="space-y-4">
         {habits.length === 0 ? (
-          <div className="p-10 text-center bg-slate-900/50 rounded-2xl border border-dashed border-slate-800">
-            <Calendar className="w-10 h-10 text-slate-600 mx-auto mb-2" />
-            <p className="text-sm font-semibold text-slate-300">No habits added yet</p>
+          <div className="p-10 text-center bg-white dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 shadow-sm">
+            <Calendar className="w-10 h-10 text-slate-400 dark:text-slate-600 mx-auto mb-2" />
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No habits added yet</p>
             <p className="text-xs text-slate-500 mt-1">Tap "+ Add Custom Habit" to begin your streak.</p>
           </div>
         ) : (
@@ -92,7 +92,7 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
             return (
               <div
                 key={habit.id}
-                className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 shadow-md hover:border-slate-700 transition-all"
+                className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -101,9 +101,9 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
                       style={{ backgroundColor: habit.color }}
                     />
                     <div>
-                      <h4 className="font-bold text-white text-base">{habit.name}</h4>
-                      <div className="flex items-center gap-2 text-xs text-slate-400">
-                        <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-semibold text-slate-300">
+                      <h4 className="font-bold text-slate-900 dark:text-white text-base">{habit.name}</h4>
+                      <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                        <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-semibold text-slate-700 dark:text-slate-300">
                           {habit.category || 'Personal'}
                         </span>
                         <span>{completedCount} / 7 Days Done</span>

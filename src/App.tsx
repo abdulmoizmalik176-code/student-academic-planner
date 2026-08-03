@@ -7,6 +7,7 @@ import { HabitsView } from './components/HabitsView';
 import { StudyFocusView } from './components/StudyFocusView';
 import { IslamicTrackerView } from './components/IslamicTrackerView';
 import { AcademicPlannerView } from './components/AcademicPlannerView';
+import { TimetableMasterView } from './components/TimetableMasterView';
 import { AiAssistantView } from './components/AiAssistantView';
 import { AnalyticsView } from './components/AnalyticsView';
 import { IdeaGuideModal } from './components/IdeaGuideModal';
@@ -110,6 +111,11 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem('student_routine_stats', JSON.stringify(stats));
+    if (stats.dark_mode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, [stats]);
 
   useEffect(() => {
@@ -289,6 +295,10 @@ export default function App() {
     setTimetable((prev) => prev.map((c) => (c.id === updatedSession.id ? updatedSession : c)));
   };
 
+  const handleClearAllClassSessions = () => {
+    setTimetable([]);
+  };
+
   // Project Handlers
   const handleAddProject = (newProjectData: Omit<Project, 'id'>) => {
     const newProject: Project = {
@@ -457,6 +467,16 @@ export default function App() {
             quranDone={isQuranDone}
             onToggleNamaz={handleToggleNamaz}
             onToggleQuran={handleToggleQuran}
+          />
+        )}
+
+        {activeTab === 'timetable' && (
+          <TimetableMasterView
+            sessions={timetable}
+            onAddSession={handleAddClassSession}
+            onUpdateSession={handleEditClassSession}
+            onDeleteSession={handleDeleteClassSession}
+            onClearAllSessions={handleClearAllClassSessions}
           />
         )}
 

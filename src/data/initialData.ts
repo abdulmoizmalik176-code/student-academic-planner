@@ -151,52 +151,7 @@ export const INITIAL_PROJECTS: Project[] = [
   }
 ];
 
-export const INITIAL_TIMETABLE: ClassSession[] = [
-  {
-    id: 'cs1',
-    subject: 'Calculus III',
-    code: 'MATH301',
-    instructor: 'Dr. Ahmad',
-    room: 'Hall B-102',
-    dayOfWeek: 0, // Monday
-    startTime: '09:00',
-    endTime: '10:30',
-    color: '#6366f1'
-  },
-  {
-    id: 'cs2',
-    subject: 'Physics II Lab',
-    code: 'PHYS202',
-    instructor: 'Prof. Sarah',
-    room: 'Physics Lab 3',
-    dayOfWeek: 0, // Monday
-    startTime: '11:00',
-    endTime: '01:00',
-    color: '#ec4899'
-  },
-  {
-    id: 'cs3',
-    subject: 'Data Structures',
-    code: 'CS201',
-    instructor: 'Dr. Tariq',
-    room: 'Lab C-04',
-    dayOfWeek: 1, // Tuesday
-    startTime: '10:00',
-    endTime: '11:30',
-    color: '#10b981'
-  },
-  {
-    id: 'cs4',
-    subject: 'Islamic Ethics & Philosophy',
-    code: 'ISL101',
-    instructor: 'Ustadh Bilal',
-    room: 'Auditorium 1',
-    dayOfWeek: 2, // Wednesday
-    startTime: '02:00',
-    endTime: '03:30',
-    color: '#f59e0b'
-  }
-];
+export const INITIAL_TIMETABLE: ClassSession[] = [];
 
 export const INITIAL_COURSES: CourseGrade[] = [
   {

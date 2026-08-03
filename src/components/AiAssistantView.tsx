@@ -158,19 +158,19 @@ export const AiAssistantView: React.FC = () => {
     <div className="space-y-6 pb-20">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black text-white flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-indigo-400" />
+          <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
             Gemini AI Study Assistant
           </h2>
-          <p className="text-xs text-slate-400">Generate practice quizzes, step-by-step goal breakdowns, and concept summaries</p>
+          <p className="text-xs text-slate-600 dark:text-slate-400">Generate practice quizzes, step-by-step goal breakdowns, and concept summaries</p>
         </div>
 
         {/* Tool Switcher */}
-        <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-bold">
+        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-bold shadow-sm">
           <button
             onClick={() => setActiveTool('quiz')}
             className={`px-3 py-1.5 rounded-lg transition-all ${
-              activeTool === 'quiz' ? 'bg-indigo-600 text-white' : 'text-slate-400'
+              activeTool === 'quiz' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             AI Quiz Maker
@@ -178,7 +178,7 @@ export const AiAssistantView: React.FC = () => {
           <button
             onClick={() => setActiveTool('breakdown')}
             className={`px-3 py-1.5 rounded-lg transition-all ${
-              activeTool === 'breakdown' ? 'bg-indigo-600 text-white' : 'text-slate-400'
+              activeTool === 'breakdown' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             Goal Breakdown
@@ -186,7 +186,7 @@ export const AiAssistantView: React.FC = () => {
           <button
             onClick={() => setActiveTool('explain')}
             className={`px-3 py-1.5 rounded-lg transition-all ${
-              activeTool === 'explain' ? 'bg-indigo-600 text-white' : 'text-slate-400'
+              activeTool === 'explain' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             Topic Explainer
@@ -197,26 +197,26 @@ export const AiAssistantView: React.FC = () => {
       {/* TOOL 1: AI Quiz Maker */}
       {activeTool === 'quiz' && (
         <div className="space-y-5">
-          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-white text-sm flex items-center gap-2">
-              <HelpCircle className="w-4 h-4 text-indigo-400" />
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
+            <h3 className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+              <HelpCircle className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               Generate Practice Test Quiz
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
               <div className="sm:col-span-2">
-                <label className="block text-slate-300 font-bold mb-1">Topic or Chapter</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Topic or Chapter</label>
                 <input
                   type="text"
                   value={quizTopic}
                   onChange={(e) => setQuizTopic(e.target.value)}
                   placeholder="e.g. Thermodynamics, Linear Algebra Eigenvalues..."
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Subject</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Subject</label>
                 <input
                   type="text"
                   value={quizSubject}

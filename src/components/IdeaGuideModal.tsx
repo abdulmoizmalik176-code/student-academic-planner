@@ -102,23 +102,23 @@ export const IdeaGuideModal: React.FC<IdeaGuideModalProps> = ({ isOpen, onClose 
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl p-6 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto my-auto">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-3xl p-6 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto my-auto text-slate-900 dark:text-white">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 rounded-lg bg-slate-100 dark:bg-slate-800 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold">
-            <Lightbulb className="w-4 h-4 text-amber-400" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-bold">
+            <Lightbulb className="w-4 h-4 text-amber-500 dark:text-amber-400" />
             <span>Essential Student Features Breakdown</span>
           </div>
-          <h2 className="text-xl font-black text-white">
+          <h2 className="text-xl font-black text-slate-900 dark:text-white">
             Top Features for the Ultimate Student Routine App
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-600 dark:text-slate-400">
             Based on research of leading productivity apps (YPT, Todait, Habitica, Forest, Muslim Pro), here is how we structured and completed this application to help students succeed:
           </p>
         </div>
@@ -127,7 +127,7 @@ export const IdeaGuideModal: React.FC<IdeaGuideModalProps> = ({ isOpen, onClose 
           {categories.map((cat, idx) => {
             const Icon = cat.icon;
             return (
-              <div key={idx} className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3">
+              <div key={idx} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-3">
                 <h3 className={`font-bold text-sm flex items-center gap-2 ${cat.color}`}>
                   <Icon className="w-4 h-4" />
                   {cat.title}
@@ -135,12 +135,12 @@ export const IdeaGuideModal: React.FC<IdeaGuideModalProps> = ({ isOpen, onClose 
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {cat.features.map((feat, fIdx) => (
-                    <div key={fIdx} className="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1">
-                      <p className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <div key={fIdx} className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1 shadow-sm">
+                      <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400 shrink-0" />
                         <span>{feat.name}</span>
                       </p>
-                      <p className="text-[11px] text-slate-400 leading-normal">{feat.desc}</p>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-normal">{feat.desc}</p>
                     </div>
                   ))}
                 </div>
