@@ -1,0 +1,6 @@
+{
+  "name": "Student Routine & Productivity Planner",
+  "description": "Comprehensive student routine app with class timetables, AI study tools, exam countdowns, habit heatmaps, Namaz & Quran logs, focus timers, and gamified reward systems.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
