@@ -1,0 +1,8 @@
+{
+  "appId": "com.academicplanner.student",
+  "appName": "Student Academic Planner",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}

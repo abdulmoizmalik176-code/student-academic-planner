@@ -18,28 +18,30 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Node Dependencies & Build Web App
-        run: |
-          npm install
-          npm run build
+      - name: Install Node Dependencies
+        run: npm install
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Build Web Application
+        run: npm run build
+
+      - name: Set up Java JDK 17
+        uses: actions/setup-java@v4
         with:
-          python-version: '3.10'
+          distribution: 'zulu'
+          java-version: '17'
 
-      - name: Install Buildozer dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential libsqlite3-dev sqlite3 bzip2 libbz2-dev zlib1g-dev libssl-dev openssl libgdbm-dev libgdbm-compat-dev liblzma-dev libreadline-dev libffi-dev libgl1-mesa-dev libgles2-mesa-dev ccache libffi-dev zip unzip openjdk-17-jdk autoconf libtool pkg-config
-          pip install --upgrade buildozer "cython<3.0.0" virtualenv setuptools
+      - name: Sync Capacitor Android Project
+        run: npx cap sync android
 
-      - name: Build Android APK with Buildozer
+      - name: Build Android APK with Gradle
         run: |
-          buildozer -v android debug
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: StudentRoutineApp-APK
-          path: bin/*.apk
+          name: StudentAcademicPlanner-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+
