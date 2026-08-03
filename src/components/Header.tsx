@@ -28,10 +28,15 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Logo & Greeting */}
         <div 
           onClick={() => onSelectTab('home')}
-          className="flex items-center gap-2 cursor-pointer group"
+          className="flex items-center gap-2.5 cursor-pointer group"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-            <BookOpenCheck className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-800 border border-indigo-500/30 shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
+            <img 
+              src="/src/assets/images/app_icon_1785759784947.jpg" 
+              alt="App Icon" 
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
           </div>
           <div>
             <div className="flex items-center gap-1.5">

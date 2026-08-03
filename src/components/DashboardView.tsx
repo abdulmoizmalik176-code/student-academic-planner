@@ -56,9 +56,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const [quoteIdx, setQuoteIdx] = useState(0);
 
   // Calculate overall completion percentage for today
-  const todayTasks = tasks.filter(t => t.dateAdded === new Date().toISOString().split('T')[0] || t.recurring);
-  const completedTasks = todayTasks.filter(t => t.doneDates.includes(new Date().toISOString().split('T')[0]));
-  const taskProgress = todayTasks.length > 0 ? (completedTasks.length / todayTasks.length) * 100 : 100;
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todayTasks = tasks.filter(t => t.dateAdded === todayStr || t.recurring);
+  const completedTasks = todayTasks.filter(t => t.doneDates.includes(todayStr));
+  const taskProgress = todayTasks.length > 0 ? Math.round((completedTasks.length / todayTasks.length) * 100) : 0;
   
   // Reward unlock check: Namaz >= 5 + Quran done + Tasks done
   const isEntertainmentUnlocked = namazCount >= 5 && quranDone && (todayTasks.length === 0 || completedTasks.length === todayTasks.length);

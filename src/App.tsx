@@ -258,9 +258,97 @@ export default function App() {
     setExams((prev) => [...prev, newExam]);
   };
 
+  const handleDeleteExam = (examId: string) => {
+    setExams((prev) => prev.filter((e) => e.id !== examId));
+  };
+
+  const handleEditExam = (updatedExam: Exam) => {
+    setExams((prev) => prev.map((e) => (e.id === updatedExam.id ? updatedExam : e)));
+  };
+
   const handleUpdateExamPrep = (examId: string, prep: number) => {
     setExams((prev) =>
       prev.map((e) => (e.id === examId ? { ...e, prep } : e))
+    );
+  };
+
+  // Timetable Handlers
+  const handleAddClassSession = (newSessionData: Omit<ClassSession, 'id'>) => {
+    const newSession: ClassSession = {
+      ...newSessionData,
+      id: `cs_${Date.now()}`,
+    };
+    setTimetable((prev) => [...prev, newSession]);
+  };
+
+  const handleDeleteClassSession = (sessionId: string) => {
+    setTimetable((prev) => prev.filter((c) => c.id !== sessionId));
+  };
+
+  const handleEditClassSession = (updatedSession: ClassSession) => {
+    setTimetable((prev) => prev.map((c) => (c.id === updatedSession.id ? updatedSession : c)));
+  };
+
+  // Project Handlers
+  const handleAddProject = (newProjectData: Omit<Project, 'id'>) => {
+    const newProject: Project = {
+      ...newProjectData,
+      id: `proj_${Date.now()}`,
+    };
+    setProjects((prev) => [...prev, newProject]);
+  };
+
+  const handleDeleteProject = (projectId: string) => {
+    setProjects((prev) => prev.filter((p) => p.id !== projectId));
+  };
+
+  const handleEditProject = (updatedProject: Project) => {
+    setProjects((prev) => prev.map((p) => (p.id === updatedProject.id ? updatedProject : p)));
+  };
+
+  const handleAddProjectSubtask = (projectId: string, subtaskTitle: string) => {
+    setProjects((prev) =>
+      prev.map((p) => {
+        if (p.id === projectId) {
+          const currentSubtasks = p.subtasks || [];
+          const newSubtask = {
+            id: `st_${Date.now()}`,
+            title: subtaskTitle,
+            done: false,
+          };
+          const updatedSubtasks = [...currentSubtasks, newSubtask];
+          const doneCount = updatedSubtasks.filter((st) => st.done).length;
+          const newProgress = Math.round((doneCount / updatedSubtasks.length) * 100);
+
+          return {
+            ...p,
+            subtasks: updatedSubtasks,
+            progress: newProgress,
+            completed: newProgress === 100,
+          };
+        }
+        return p;
+      })
+    );
+  };
+
+  const handleDeleteProjectSubtask = (projectId: string, subtaskId: string) => {
+    setProjects((prev) =>
+      prev.map((p) => {
+        if (p.id === projectId && p.subtasks) {
+          const updatedSubtasks = p.subtasks.filter((st) => st.id !== subtaskId);
+          const doneCount = updatedSubtasks.filter((st) => st.done).length;
+          const newProgress = updatedSubtasks.length > 0 ? Math.round((doneCount / updatedSubtasks.length) * 100) : 0;
+
+          return {
+            ...p,
+            subtasks: updatedSubtasks,
+            progress: newProgress,
+            completed: newProgress === 100,
+          };
+        }
+        return p;
+      })
     );
   };
 
@@ -310,7 +398,7 @@ export default function App() {
   const isQuranDone = quranLog.includes(TODAY_STR);
 
   return (
-    <div className={`min-h-screen ${stats.dark_mode ? 'bg-slate-950 text-slate-100' : 'bg-slate-950 text-slate-100'} font-sans antialiased`}>
+    <div className={`min-h-screen ${stats.dark_mode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-900'} font-sans antialiased transition-colors duration-200`}>
       {/* Header */}
       <Header
         stats={stats}
@@ -379,7 +467,17 @@ export default function App() {
             timetable={timetable}
             courses={courses}
             onAddExam={handleAddExam}
+            onDeleteExam={handleDeleteExam}
+            onEditExam={handleEditExam}
             onUpdateExamPrep={handleUpdateExamPrep}
+            onAddClassSession={handleAddClassSession}
+            onDeleteClassSession={handleDeleteClassSession}
+            onEditClassSession={handleEditClassSession}
+            onAddProject={handleAddProject}
+            onDeleteProject={handleDeleteProject}
+            onEditProject={handleEditProject}
+            onAddProjectSubtask={handleAddProjectSubtask}
+            onDeleteProjectSubtask={handleDeleteProjectSubtask}
             onToggleProjectSubtask={handleToggleProjectSubtask}
           />
         )}

@@ -11,7 +11,7 @@ export const INITIAL_TASKS: Task[] = [
     recurring: true,
     note: 'Focus on Carnot engine efficiency formulas and past exam questions.',
     doneDates: [],
-    progress: 40,
+    progress: 0,
     dateAdded: TODAY_STR,
     subject: 'Physics',
     estimatedMinutes: 60
@@ -24,7 +24,7 @@ export const INITIAL_TASKS: Task[] = [
     recurring: false,
     note: 'Double check matrix eigenvalue proofs before submitting to portal.',
     doneDates: [],
-    progress: 80,
+    progress: 0,
     dateAdded: TODAY_STR,
     subject: 'Mathematics',
     estimatedMinutes: 45
@@ -36,8 +36,8 @@ export const INITIAL_TASKS: Task[] = [
     priority: 'Medium',
     recurring: true,
     note: 'Recite at least 10 verses with translation.',
-    doneDates: [TODAY_STR],
-    progress: 100,
+    doneDates: [],
+    progress: 0,
     dateAdded: TODAY_STR,
     subject: 'Islamic Studies',
     estimatedMinutes: 20
@@ -50,7 +50,7 @@ export const INITIAL_TASKS: Task[] = [
     recurring: false,
     note: 'Find 3 peer-reviewed journal citations.',
     doneDates: [],
-    progress: 20,
+    progress: 0,
     dateAdded: TODAY_STR,
     subject: 'English',
     estimatedMinutes: 50
@@ -63,7 +63,7 @@ export const INITIAL_HABITS: Habit[] = [
     name: 'Daily 2-Hour Deep Focus Study',
     color: '#6366f1',
     days: [true, true, true, true, true, true, true],
-    log: [TODAY_STR],
+    log: [],
     category: 'Study'
   },
   {
@@ -71,7 +71,7 @@ export const INITIAL_HABITS: Habit[] = [
     name: 'Read Quran Daily',
     color: '#10b981',
     days: [true, true, true, true, true, true, true],
-    log: [TODAY_STR],
+    log: [],
     category: 'Spiritual'
   },
   {
@@ -79,7 +79,7 @@ export const INITIAL_HABITS: Habit[] = [
     name: 'Drink 8 Glasses of Water',
     color: '#06b6d4',
     days: [true, true, true, true, true, true, true],
-    log: [TODAY_STR],
+    log: [],
     category: 'Health'
   },
   {
@@ -236,15 +236,15 @@ export const INITIAL_COURSES: CourseGrade[] = [
 ];
 
 export const INITIAL_USER_STATS: UserStats = {
-  points: 380,
-  level: 4,
-  badges: ['Level 3 Reached', '5-Day Study Streak', 'Perfect Prayer Day', 'Quiz Master'],
-  streak: 5,
-  dark_mode: false,
+  points: 50,
+  level: 1,
+  badges: ['Level 1 Student'],
+  streak: 1,
+  dark_mode: true,
   city: 'Islamabad',
   entTimerRunning: false,
   entTimeLeft: 7200,
-  waterGlasses: 5
+  waterGlasses: 0
 };
 
 export const NAMAZ_SCHEDULE: Record<string, { Fajr: string; Zuhr: string; Asr: string; Maghrib: string; Isha: string }> = {

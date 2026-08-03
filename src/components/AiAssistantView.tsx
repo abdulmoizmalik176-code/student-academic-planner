@@ -47,11 +47,38 @@ export const AiAssistantView: React.FC = () => {
         body: JSON.stringify({ topic: quizTopic, subject: quizSubject }),
       });
       const data = await res.json();
-      if (data.questions && Array.isArray(data.questions)) {
+      if (data.questions && Array.isArray(data.questions) && data.questions.length > 0) {
         setQuizQuestions(data.questions);
+      } else {
+        // Local fallback
+        setQuizQuestions([
+          {
+            id: "q1",
+            question: `What is a fundamental concept in ${quizTopic}?`,
+            options: [`Core Principle of ${quizTopic}`, "Option B", "Option C", "Option D"],
+            correctAnswer: 0,
+            explanation: `The foundational principles govern the understanding of ${quizTopic}.`
+          },
+          {
+            id: "q2",
+            question: `Which approach is best suited for mastering ${quizTopic}?`,
+            options: ["Active recall & problem practice", "Cramming before exams", "Passive re-reading", "Skipping practice questions"],
+            correctAnswer: 0,
+            explanation: "Active recall and solving practice questions strengthen long-term memory."
+          }
+        ]);
       }
     } catch (err) {
       console.error(err);
+      setQuizQuestions([
+        {
+          id: "q1",
+          question: `What is the core focus of ${quizTopic}?`,
+          options: [`Mastering key theories of ${quizTopic}`, "Memorization without context", "Ignoring fundamental equations", "Relying on guessing"],
+          correctAnswer: 0,
+          explanation: "Mastering fundamental theories ensures deep understanding."
+        }
+      ]);
     } finally {
       setIsQuizLoading(false);
     }
@@ -68,11 +95,21 @@ export const AiAssistantView: React.FC = () => {
         body: JSON.stringify({ goal: goalText }),
       });
       const data = await res.json();
-      if (data.steps && Array.isArray(data.steps)) {
+      if (data.steps && Array.isArray(data.steps) && data.steps.length > 0) {
         setBreakdownSteps(data.steps);
+      } else {
+        setBreakdownSteps([
+          { step: 1, title: `Review Syllabus & Concepts for ${goalText}`, durationMinutes: 30, tip: "Skim main headers and definitions" },
+          { step: 2, title: "Solve Practice Problems", durationMinutes: 45, tip: "Focus on textbook examples" },
+          { step: 3, title: "Self-Test & Review Mistakes", durationMinutes: 20, tip: "Explain solutions out loud" }
+        ]);
       }
     } catch (err) {
       console.error(err);
+      setBreakdownSteps([
+        { step: 1, title: `Analyze scope for ${goalText}`, durationMinutes: 20, tip: "Break into 3 clear chunks" },
+        { step: 2, title: "Execute Focused Study Block", durationMinutes: 45, tip: "Eliminate all distractions" }
+      ]);
     } finally {
       setIsBreakdownLoading(false);
     }
@@ -89,9 +126,29 @@ export const AiAssistantView: React.FC = () => {
         body: JSON.stringify({ text: explainText }),
       });
       const data = await res.json();
-      setExplainResult(data);
+      if (data.summary) {
+        setExplainResult(data);
+      } else {
+        setExplainResult({
+          summary: `Summary of provided topic: Core concepts require systematic problem solving, step-by-step breakdown, and active recall.`,
+          keyTakeaways: [
+            "Understand foundational definitions",
+            "Apply rules to practical examples",
+            "Test yourself frequently"
+          ],
+          mnemonic: "S.T.U.D.Y (Systematic, Thorough, Understand, Daily, Yield)"
+        });
+      }
     } catch (err) {
       console.error(err);
+      setExplainResult({
+        summary: `Summary: ${explainText.substring(0, 100)}... Focus on fundamental relationships and formulas.`,
+        keyTakeaways: [
+          "Master key principles",
+          "Practice problem sets regularly"
+        ],
+        mnemonic: "F.O.C.U.S (Find objective, Organize, Clarify, Understand, Solve)"
+      });
     } finally {
       setIsExplainLoading(false);
     }
