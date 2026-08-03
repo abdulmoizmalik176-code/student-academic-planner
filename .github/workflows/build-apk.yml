@@ -30,8 +30,10 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Setup Gradle
+      - name: Setup Gradle 8.7
         uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.7'
 
       - name: Sync Capacitor Android Project
         run: npx cap sync android
@@ -39,7 +41,6 @@ jobs:
       - name: Build Android APK with Gradle
         run: |
           cd android
-          gradle wrapper
           chmod +x gradlew
           ./gradlew assembleDebug --stacktrace
 
