@@ -35,6 +35,9 @@ jobs:
         with:
           gradle-version: '8.14.3'
 
+      - name: Generate Capacitor App Icons and Splash Screens
+        run: npx @capacitor/assets generate --android
+
       - name: Sync Capacitor Android Project
         run: npx cap sync android
 
