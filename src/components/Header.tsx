@@ -1,5 +1,5 @@
-import React from 'react';
-import { Flame, Star, Trophy, Moon, Sun, BookOpenCheck, Sparkles, Lightbulb } from 'lucide-react';
+import React, { useState } from 'react';
+import { Flame, Star, Trophy, Moon, Sun, BookOpenCheck, Sparkles, Lightbulb, GraduationCap } from 'lucide-react';
 import { UserStats, ActiveTab } from '../types';
 
 interface HeaderProps {
@@ -16,6 +16,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectTab,
   onOpenGuide,
 }) => {
+  const [imgError, setImgError] = useState(false);
   const todayFormatted = new Date().toLocaleDateString('en-US', {
     weekday: 'short',
     month: 'short',
@@ -30,13 +31,17 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={() => onSelectTab('home')}
           className="flex items-center gap-2.5 cursor-pointer group"
         >
-          <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-indigo-500/30 shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
-            <img 
-              src="/src/assets/images/app_icon_1785759784947.jpg" 
-              alt="App Icon" 
-              className="w-full h-full object-cover"
-              referrerPolicy="no-referrer"
-            />
+          <div className="w-10 h-10 rounded-xl overflow-hidden bg-gradient-to-br from-indigo-600 to-purple-600 border border-indigo-500/30 shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform flex-shrink-0 flex items-center justify-center">
+            {!imgError ? (
+              <img 
+                src="/app_icon.jpg" 
+                alt="Student Routine & AI Logo" 
+                className="w-full h-full object-cover"
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              <GraduationCap className="w-6 h-6 text-white" />
+            )}
           </div>
           <div>
             <div className="flex items-center gap-1.5">
@@ -51,40 +56,29 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Quick Gamification Badges */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* Right side: Project branding, streak/level stats & theme toggle */}
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
+          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-indigo-500/15 to-purple-500/15 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-xs font-extrabold shadow-sm">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+            <span>Malik Abdul Moiz project</span>
+          </div>
+
           {/* Streak */}
-          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-semibold shadow-inner">
+          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-bold shadow-sm">
             <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500 animate-pulse" />
             <span>{stats.streak}d Streak</span>
           </div>
 
-          {/* Points */}
-          <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-xs font-semibold">
-            <Star className="w-3.5 h-3.5 text-indigo-500 fill-indigo-500" />
-            <span>{stats.points} XP</span>
-          </div>
-
           {/* Level */}
-          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-semibold">
+          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-bold shadow-sm">
             <Trophy className="w-3.5 h-3.5 text-purple-500" />
             <span>Lvl {stats.level}</span>
           </div>
 
-          {/* Feature Expansion Ideas Button */}
-          <button
-            onClick={onOpenGuide}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/40 text-amber-900 dark:text-amber-200 text-xs font-medium transition-all shadow-sm"
-            title="View Student Feature Ideas & Architecture Guide"
-          >
-            <Lightbulb className="w-4 h-4 text-amber-600 dark:text-amber-300 animate-bounce" />
-            <span className="hidden md:inline font-bold">Feature Ideas</span>
-          </button>
-
           {/* Dark Mode Toggle */}
           <button
             onClick={onToggleDarkMode}
-            className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors border border-slate-300 dark:border-slate-700"
+            className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors border border-slate-300 dark:border-slate-700 shrink-0"
             title="Toggle theme"
           >
             {stats.dark_mode ? (

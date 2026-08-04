@@ -130,6 +130,53 @@ export default function App() {
     localStorage.setItem('student_routine_notes', JSON.stringify(notesHistory));
   }, [notesHistory]);
 
+  // Dynamic Daily Streak Calculation
+  useEffect(() => {
+    const getActivityCountForDate = (dateStr: string) => {
+      const namazCount = (namazLog[dateStr] || []).length;
+      const quranCount = quranLog.includes(dateStr) ? 1 : 0;
+      const tasksCount = tasks.filter((t) => t.doneDates && t.doneDates.includes(dateStr)).length;
+      const habitsCount = habits.filter((h) => h.log && h.log.includes(dateStr)).length;
+      return namazCount + quranCount + tasksCount + habitsCount;
+    };
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const todayActivity = getActivityCountForDate(todayStr);
+
+    let calculatedStreak = 0;
+    let checkDate = new Date(today);
+
+    if (todayActivity >= 1) {
+      // Today has at least 1 completed task/prayer/quran/habit
+      while (true) {
+        const dStr = checkDate.toISOString().split('T')[0];
+        if (getActivityCountForDate(dStr) >= 1) {
+          calculatedStreak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+    } else {
+      // Today not active yet, check starting from yesterday
+      checkDate.setDate(checkDate.getDate() - 1);
+      while (true) {
+        const dStr = checkDate.toISOString().split('T')[0];
+        if (getActivityCountForDate(dStr) >= 1) {
+          calculatedStreak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+    }
+
+    if (stats.streak !== calculatedStreak) {
+      setStats((prev) => ({ ...prev, streak: calculatedStreak }));
+    }
+  }, [tasks, namazLog, quranLog, habits, stats.streak]);
+
   // Entertainment Timer Countdown
   useEffect(() => {
     let interval: any = null;

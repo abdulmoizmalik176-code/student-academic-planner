@@ -1,0 +1,20 @@
+{
+  "short_name": "Routine & AI",
+  "name": "Student Routine & AI Master",
+  "icons": [
+    {
+      "src": "/app_icon.jpg",
+      "sizes": "192x192 512x512",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "display": "standalone"
+}

@@ -46,13 +46,16 @@ export interface Project {
 export interface ClassSession {
   id: string;
   subject: string;
-  code: string;
-  instructor: string;
-  room: string;
-  dayOfWeek: number; // 0=Mon, 6=Sun
-  startTime: string; // HH:MM
-  endTime: string; // HH:MM
+  code?: string;
+  instructor?: string;
+  room?: string;
+  dayOfWeek: number; // 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun
+  startTime: string; // e.g. "08:30" or "08:30 AM"
+  endTime: string; // e.g. "09:30" or "09:30 AM"
   color: string;
+  category?: 'Study' | 'Namaz' | 'Business' | 'Break' | 'Personal' | 'Revision';
+  notes?: string;
+  isCompletedToday?: boolean;
 }
 
 export interface CourseGrade {

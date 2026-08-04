@@ -9,6 +9,7 @@ import {
   Lock, 
   Unlock, 
   Flame, 
+  Trophy,
   Sparkles, 
   Gamepad2, 
   Clock, 
@@ -99,13 +100,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               Stay consistent with your study targets, daily prayers, habits, and exam preparations.
             </p>
             
-            <div className="flex items-center justify-center md:justify-start gap-4 pt-2">
-              <div className="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/60 text-amber-300 text-xs font-bold">
-                <Flame className="w-4 h-4 fill-amber-400 text-amber-400 animate-pulse" />
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 pt-2">
+              <div className="flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-indigo-500/40 text-indigo-200 text-xs font-black shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span>Malik Abdul Moiz Project</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-amber-500/40 text-amber-300 text-xs font-bold shadow-sm">
+                <Flame className="w-3.5 h-3.5 fill-amber-400 text-amber-400 animate-pulse" />
                 <span>{stats.streak} Days Streak</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/60 text-purple-300 text-xs font-bold">
-                <Sparkles className="w-4 h-4 text-purple-400" />
+              <div className="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-purple-500/40 text-purple-300 text-xs font-bold shadow-sm">
+                <Trophy className="w-3.5 h-3.5 text-purple-400" />
                 <span>Level {stats.level} ({stats.points} XP)</span>
               </div>
             </div>
