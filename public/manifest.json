@@ -1,6 +1,13 @@
 {
+  "id": "/",
   "short_name": "Student Master",
   "name": "Student Routine & Academic Master",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#4f46e5",
+  "background_color": "#0f172a",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -31,10 +38,5 @@
       "sizes": "180x180",
       "type": "image/png"
     }
-  ],
-  "start_url": "/",
-  "background_color": "#0f172a",
-  "theme_color": "#4f46e5",
-  "display": "standalone",
-  "orientation": "portrait"
+  ]
 }
