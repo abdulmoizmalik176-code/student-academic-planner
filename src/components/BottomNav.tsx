@@ -3,12 +3,13 @@ import {
   Home, 
   CheckSquare, 
   Flame, 
-  Timer, 
   Moon, 
   GraduationCap, 
   Calendar,
   Sparkles, 
-  BarChart3 
+  BarChart3,
+  BookOpen,
+  HeartHandshake
 } from 'lucide-react';
 import { ActiveTab } from '../types';
 
@@ -28,21 +29,20 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onSelectTab }) 
   const tabs: TabItem[] = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'tasks', label: 'Tasks', icon: CheckSquare },
-    { id: 'habits', label: 'Habits', icon: Flame },
-    { id: 'focus', label: 'Focus', icon: Timer },
+    { id: 'timetable', label: 'Routine', icon: Calendar },
     { id: 'islamic', label: 'Namaz', icon: Moon },
-    { id: 'timetable', label: 'Timetable', icon: Calendar },
-    { id: 'academic', label: 'Exams', icon: GraduationCap },
-    { id: 'ai', label: 'AI Study', icon: Sparkles, highlight: true },
-    { id: 'reports', label: 'Stats', icon: BarChart3 },
+    { id: 'habits', label: 'Habits', icon: Flame },
+    { id: 'self_reflection', label: 'Muhasaba', icon: HeartHandshake },
+    { id: 'reports', label: 'Journal', icon: BarChart3 },
+    { id: 'academic', label: 'Projects', icon: GraduationCap },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200 dark:border-indigo-900/40 text-slate-600 dark:text-slate-400 px-2 py-1.5 shadow-xl">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200 dark:border-indigo-900/40 text-slate-600 dark:text-slate-400 px-2 py-1.5 shadow-xl">
       <div className="max-w-4xl mx-auto flex items-center justify-between">
         {tabs.map((tab) => {
           const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
+          const isActive = activeTab === tab.id || (tab.id === 'self_reflection' && activeTab === 'muhasaba');
           return (
             <button
               key={tab.id}

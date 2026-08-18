@@ -4,26 +4,30 @@ import {
   Calendar, 
   Plus, 
   Trash2,
-  Edit3,
-  X,
-  Layers,
-  Clock,
-  BookOpen
+  Edit3, 
+  X, 
+  Layers, 
+  Clock, 
+  BookOpen,
+  CheckCircle2,
+  Circle,
+  Code,
+  Sparkles,
+  ExternalLink,
+  Target,
+  FileText,
+  Flame,
+  Check
 } from 'lucide-react';
-import { Exam, Project, ClassSession, CourseGrade } from '../types';
+import { Exam, Project } from '../types';
 
 interface AcademicPlannerViewProps {
   exams: Exam[];
   projects: Project[];
-  timetable: ClassSession[];
-  courses: CourseGrade[];
   onAddExam: (newExam: Omit<Exam, 'id'>) => void;
   onDeleteExam: (examId: string) => void;
   onEditExam: (updatedExam: Exam) => void;
   onUpdateExamPrep: (examId: string, prep: number) => void;
-  onAddClassSession: (newSession: Omit<ClassSession, 'id'>) => void;
-  onDeleteClassSession: (sessionId: string) => void;
-  onEditClassSession: (updatedSession: ClassSession) => void;
   onAddProject: (newProject: Omit<Project, 'id'>) => void;
   onDeleteProject: (projectId: string) => void;
   onEditProject: (updatedProject: Project) => void;
@@ -35,15 +39,10 @@ interface AcademicPlannerViewProps {
 export const AcademicPlannerView: React.FC<AcademicPlannerViewProps> = ({
   exams,
   projects,
-  timetable,
-  courses,
   onAddExam,
   onDeleteExam,
   onEditExam,
   onUpdateExamPrep,
-  onAddClassSession,
-  onDeleteClassSession,
-  onEditClassSession,
   onAddProject,
   onDeleteProject,
   onEditProject,
@@ -51,71 +50,67 @@ export const AcademicPlannerView: React.FC<AcademicPlannerViewProps> = ({
   onDeleteProjectSubtask,
   onToggleProjectSubtask,
 }) => {
-  const [activeTab, setActiveTab] = useState<'exams' | 'timetable' | 'projects' | 'gpa'>('exams');
+  const [activeTab, setActiveTab] = useState<'projects' | 'exams'>('projects');
+  const [projectFilter, setProjectFilter] = useState<string>('all');
 
-  // Modal States
+  // Modal States - Exam
   const [isAddExamModal, setIsAddExamModal] = useState(false);
   const [editingExam, setEditingExam] = useState<Exam | null>(null);
-
-  const [isAddClassModal, setIsAddClassModal] = useState(false);
-  const [editingClass, setEditingClass] = useState<ClassSession | null>(null);
-
-  const [isAddProjectModal, setIsAddProjectModal] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
-
-  // Form States - Exam
   const [examSubject, setExamSubject] = useState('');
   const [examDate, setExamDate] = useState('2026-08-25');
   const [examWeight, setExamWeight] = useState(30);
   const [examSyllabusNotes, setExamSyllabusNotes] = useState('');
 
-  // Form States - Class Session
-  const [classSubject, setClassSubject] = useState('');
-  const [classCode, setClassCode] = useState('');
-  const [classInstructor, setClassInstructor] = useState('');
-  const [classRoom, setClassRoom] = useState('');
-  const [classDayOfWeek, setClassDayOfWeek] = useState(0); // 0 = Mon
-  const [classStartTime, setClassStartTime] = useState('09:00');
-  const [classEndTime, setClassEndTime] = useState('10:30');
-  const [classColor, setClassColor] = useState('#6366f1');
-
-  // Form States - Project
+  // Modal States - Project / Course
+  const [isAddProjectModal, setIsAddProjectModal] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [projectTitle, setProjectTitle] = useState('');
+  const [projectType, setProjectType] = useState<'App Development' | 'Online Course' | 'Skill Learning' | 'Exam Prep' | 'Personal Project'>('App Development');
   const [projectSubject, setProjectSubject] = useState('');
   const [projectStart, setProjectStart] = useState(new Date().toISOString().split('T')[0]);
-  const [projectEnd, setProjectEnd] = useState('2026-08-30');
+  const [projectEnd, setProjectEnd] = useState('2026-09-15');
+  const [projectNotes, setProjectNotes] = useState('');
 
-  // Subtask Input state per project
+  // Inline Subtask Input state per project
   const [newSubtaskTexts, setNewSubtaskTexts] = useState<Record<string, string>>({});
 
-  const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+  // Countdown Helper
+  const getDaysLeft = (targetDateStr: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const target = new Date(targetDateStr);
+    target.setHours(0, 0, 0, 0);
+    const diffTime = target.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
 
   // Handle Exam Submit
-  const handleCreateExam = (e: React.FormEvent) => {
+  const handleSaveExam = (e: React.FormEvent) => {
     e.preventDefault();
     if (!examSubject.trim()) return;
 
     if (editingExam) {
       onEditExam({
         ...editingExam,
-        subject: examSubject,
+        subject: examSubject.trim(),
         date: examDate,
         weight: examWeight,
-        syllabusNotes: examSyllabusNotes,
+        syllabusNotes: examSyllabusNotes.trim(),
       });
-      setEditingExam(null);
     } else {
       onAddExam({
-        subject: examSubject,
+        subject: examSubject.trim(),
         date: examDate,
         prep: 0,
         weight: examWeight,
-        syllabusNotes: examSyllabusNotes,
+        syllabusNotes: examSyllabusNotes.trim(),
       });
     }
 
     setExamSubject('');
     setExamSyllabusNotes('');
+    setEditingExam(null);
     setIsAddExamModal(false);
   };
 
@@ -128,234 +123,362 @@ export const AcademicPlannerView: React.FC<AcademicPlannerViewProps> = ({
     setIsAddExamModal(true);
   };
 
-  // Handle Class Submit
-  const handleCreateClass = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!classSubject.trim()) return;
-
-    if (editingClass) {
-      onEditClassSession({
-        ...editingClass,
-        subject: classSubject,
-        code: classCode,
-        instructor: classInstructor,
-        room: classRoom,
-        dayOfWeek: Number(classDayOfWeek),
-        startTime: classStartTime,
-        endTime: classEndTime,
-        color: classColor,
-      });
-      setEditingClass(null);
-    } else {
-      onAddClassSession({
-        subject: classSubject,
-        code: classCode,
-        instructor: classInstructor,
-        room: classRoom,
-        dayOfWeek: Number(classDayOfWeek),
-        startTime: classStartTime,
-        endTime: classEndTime,
-        color: classColor,
-      });
-    }
-
-    setClassSubject('');
-    setClassCode('');
-    setClassInstructor('');
-    setClassRoom('');
-    setIsAddClassModal(false);
-  };
-
-  const openEditClass = (cls: ClassSession) => {
-    setEditingClass(cls);
-    setClassSubject(cls.subject);
-    setClassCode(cls.code);
-    setClassInstructor(cls.instructor);
-    setClassRoom(cls.room);
-    setClassDayOfWeek(cls.dayOfWeek);
-    setClassStartTime(cls.startTime);
-    setClassEndTime(cls.endTime);
-    setClassColor(cls.color);
-    setIsAddClassModal(true);
-  };
-
   // Handle Project Submit
-  const handleCreateProject = (e: React.FormEvent) => {
+  const handleSaveProject = (e: React.FormEvent) => {
     e.preventDefault();
     if (!projectTitle.trim()) return;
 
     if (editingProject) {
       onEditProject({
         ...editingProject,
-        title: projectTitle,
-        subject: projectSubject,
+        title: projectTitle.trim(),
+        type: projectType,
+        subject: projectSubject.trim() || 'General',
         start: projectStart,
         end: projectEnd,
+        notes: projectNotes.trim(),
       });
-      setEditingProject(null);
     } else {
       onAddProject({
-        title: projectTitle,
-        subject: projectSubject,
+        title: projectTitle.trim(),
+        type: projectType,
+        subject: projectSubject.trim() || 'General',
         start: projectStart,
         end: projectEnd,
         completed: false,
         progress: 0,
+        notes: projectNotes.trim(),
         subtasks: [],
       });
     }
 
     setProjectTitle('');
     setProjectSubject('');
+    setProjectNotes('');
+    setEditingProject(null);
     setIsAddProjectModal(false);
   };
 
-  const openEditProject = (proj: Project) => {
-    setEditingProject(proj);
-    setProjectTitle(proj.title);
-    setProjectSubject(proj.subject || '');
-    setProjectStart(proj.start);
-    setProjectEnd(proj.end);
+  const openEditProject = (p: Project) => {
+    setEditingProject(p);
+    setProjectTitle(p.title);
+    setProjectType(p.type || 'App Development');
+    setProjectSubject(p.subject || '');
+    setProjectStart(p.start || new Date().toISOString().split('T')[0]);
+    setProjectEnd(p.end || '2026-09-15');
+    setProjectNotes(p.notes || '');
     setIsAddProjectModal(true);
   };
 
-  const handleAddSubtaskClick = (projectId: string) => {
-    const text = newSubtaskTexts[projectId] || '';
-    if (!text.trim()) return;
+  const handleAddSubtaskInline = (projectId: string) => {
+    const text = newSubtaskTexts[projectId];
+    if (!text || !text.trim()) return;
     onAddProjectSubtask(projectId, text.trim());
-    setNewSubtaskTexts({ ...newSubtaskTexts, [projectId]: '' });
+    setNewSubtaskTexts((prev) => ({ ...prev, [projectId]: '' }));
   };
+
+  // Filtered Projects
+  const filteredProjects = projects.filter((p) => {
+    if (projectFilter === 'all') return true;
+    if (projectFilter === 'completed') return p.completed;
+    if (projectFilter === 'in_progress') return !p.completed;
+    if (projectFilter === 'apps') return p.type === 'App Development';
+    if (projectFilter === 'courses') return p.type === 'Online Course' || p.type === 'Skill Learning';
+    return true;
+  });
 
   return (
     <div className="space-y-6 pb-20">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-            <GraduationCap className="w-6 h-6 text-pink-600 dark:text-pink-400" />
-            Academic Planner & Exam Countdown
-          </h2>
-          <p className="text-xs text-slate-600 dark:text-slate-400">Class schedules, exam prep countdowns, projects, and GPA target calculator</p>
-        </div>
+      {/* Top Banner */}
+      <div className="bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-xl border border-indigo-800/40 relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-44 h-44 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/30 border border-indigo-400/40 text-indigo-200 text-xs font-black uppercase tracking-wider flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-amber-300" />
+                Course & App Builder
+              </span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+              <Layers className="w-6 h-6 text-indigo-400" />
+              Projects & Exam Countdown
+            </h2>
+            <p className="text-xs sm:text-sm text-indigo-200/80 mt-1 max-w-xl">
+              Track your app building milestones, online learning courses, and stay on top of upcoming exams with automatic countdowns.
+            </p>
+          </div>
 
-        {/* Tab switcher */}
-        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-bold shadow-sm">
-          <button
-            onClick={() => setActiveTab('exams')}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              activeTab === 'exams' ? 'bg-pink-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-            }`}
-          >
-            Exams
-          </button>
-          <button
-            onClick={() => setActiveTab('timetable')}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              activeTab === 'timetable' ? 'bg-pink-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-            }`}
-          >
-            Timetable
-          </button>
-          <button
-            onClick={() => setActiveTab('projects')}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              activeTab === 'projects' ? 'bg-pink-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-            }`}
-          >
-            Projects
-          </button>
-          <button
-            onClick={() => setActiveTab('gpa')}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              activeTab === 'gpa' ? 'bg-pink-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-            }`}
-          >
-            GPA
-          </button>
+          {/* Quick Switch Buttons */}
+          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/15 shrink-0 self-start md:self-auto">
+            <button
+              onClick={() => setActiveTab('projects')}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                activeTab === 'projects'
+                  ? 'bg-white text-indigo-950 shadow-md font-extrabold'
+                  : 'text-white/80 hover:text-white'
+              }`}
+            >
+              <Code className="w-4 h-4" />
+              <span>Projects & Courses ({projects.length})</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('exams')}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                activeTab === 'exams'
+                  ? 'bg-white text-indigo-950 shadow-md font-extrabold'
+                  : 'text-white/80 hover:text-white'
+              }`}
+            >
+              <GraduationCap className="w-4 h-4" />
+              <span>Exam Countdown ({exams.length})</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Tab Content 1: Exams */}
-      {activeTab === 'exams' && (
+      {/* ===================== TAB 1: PROJECTS & COURSES ===================== */}
+      {activeTab === 'projects' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Upcoming Examinations</h3>
+          {/* Controls */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+              {[
+                { label: 'All Projects', value: 'all' },
+                { label: 'In Progress', value: 'in_progress' },
+                { label: 'App Development', value: 'apps' },
+                { label: 'Courses & Skills', value: 'courses' },
+                { label: 'Completed', value: 'completed' },
+              ].map((f) => (
+                <button
+                  key={f.value}
+                  onClick={() => setProjectFilter(f.value)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors whitespace-nowrap ${
+                    projectFilter === f.value
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+
             <button
               onClick={() => {
-                setEditingExam(null);
-                setExamSubject('');
-                setExamSyllabusNotes('');
-                setIsAddExamModal(true);
+                setEditingProject(null);
+                setProjectTitle('');
+                setProjectType('App Development');
+                setProjectSubject('');
+                setProjectStart(new Date().toISOString().split('T')[0]);
+                setProjectEnd('2026-09-15');
+                setProjectNotes('');
+                setIsAddProjectModal(true);
               }}
-              className="px-3 py-1.5 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md"
+              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all hover:scale-[1.02] shrink-0"
             >
               <Plus className="w-4 h-4" />
-              <span>Add Exam</span>
+              <span>New Project / Course</span>
             </button>
           </div>
 
-          {exams.length === 0 ? (
-            <div className="p-8 text-center bg-white dark:bg-slate-900/60 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 shadow-sm">
-              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">No exams scheduled yet. Click "Add Exam" to start!</p>
+          {/* Projects List */}
+          {filteredProjects.length === 0 ? (
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-10 border border-dashed border-slate-300 dark:border-slate-700 text-center space-y-3">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                <Code className="w-7 h-7" />
+              </div>
+              <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
+                No Projects or Courses Found
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                Create a project to track building your next web/mobile app, or organize an online course with milestone chapters.
+              </p>
+              <button
+                onClick={() => setIsAddProjectModal(true)}
+                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-md"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add First Project</span>
+              </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {exams.map((exam) => {
-                const examDate = new Date(exam.date);
-                const today = new Date();
-                const daysLeft = Math.ceil((examDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+              {filteredProjects.map((project) => {
+                const subtasks = project.subtasks || [];
+                const doneSubtasks = subtasks.filter((s) => s.done).length;
+                const progressPct = subtasks.length > 0
+                  ? Math.round((doneSubtasks / subtasks.length) * 100)
+                  : project.progress || 0;
+                const daysLeft = getDaysLeft(project.end);
 
                 return (
-                  <div key={exam.id} className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3 shadow-sm dark:shadow-md relative group">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h4 className="font-bold text-slate-900 dark:text-white text-base">{exam.subject}</h4>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">Weight: {exam.weight || 30}% of total course grade</p>
+                  <div
+                    key={project.id}
+                    className={`bg-white dark:bg-slate-900 rounded-3xl p-5 border transition-all duration-200 shadow-sm flex flex-col justify-between space-y-4 ${
+                      project.completed
+                        ? 'border-emerald-300 dark:border-emerald-800/80 bg-emerald-50/10 dark:bg-emerald-950/10'
+                        : 'border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700'
+                    }`}
+                  >
+                    <div className="space-y-3">
+                      {/* Header Badges */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={`px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold border ${
+                            project.type === 'App Development'
+                              ? 'bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800'
+                              : project.type === 'Online Course'
+                              ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                              : 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800'
+                          }`}>
+                            {project.type || 'Project'}
+                          </span>
+                          {project.subject && (
+                            <span className="text-[11px] text-slate-500 font-medium">
+                              • {project.subject}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => openEditProject(project)}
+                            className="p-1 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            title="Edit"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => onDeleteProject(project.id)}
+                            className="p-1 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-black ${
-                          daysLeft <= 7 ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
-                        }`}>
-                          {daysLeft > 0 ? `${daysLeft} Days Left` : 'Exam Today!'}
-                        </span>
-                        
-                        <button
-                          onClick={() => openEditExam(exam)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                          title="Edit Exam"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => onDeleteExam(exam.id)}
-                          className="p-1.5 rounded-lg text-rose-500 hover:text-rose-600 dark:hover:text-rose-300 hover:bg-rose-500/10 transition-colors"
-                          title="Delete Exam"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                      {/* Project Title */}
+                      <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                        {project.title}
+                      </h4>
+
+                      {/* Notes */}
+                      {project.notes && (
+                        <p className="text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                          {project.notes}
+                        </p>
+                      )}
+
+                      {/* Progress Bar */}
+                      <div>
+                        <div className="flex items-center justify-between text-xs font-bold mb-1">
+                          <span className="text-slate-600 dark:text-slate-400">Milestone Progress</span>
+                          <span className="text-indigo-600 dark:text-indigo-400">{progressPct}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full transition-all duration-300 ${
+                              progressPct === 100
+                                ? 'bg-emerald-500'
+                                : 'bg-gradient-to-r from-indigo-500 to-purple-500'
+                            }`}
+                            style={{ width: `${progressPct}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Subtasks / Milestones list */}
+                      <div className="space-y-1.5 pt-1">
+                        <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                          <span>Milestones & Modules ({doneSubtasks}/{subtasks.length})</span>
+                        </div>
+
+                        <div className="space-y-1 max-h-36 overflow-y-auto pr-1">
+                          {subtasks.map((st) => (
+                            <div
+                              key={st.id}
+                              className="flex items-center justify-between gap-2 text-xs p-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-100 dark:border-slate-800 group"
+                            >
+                              <button
+                                onClick={() => onToggleProjectSubtask(project.id, st.id)}
+                                className="flex items-center gap-2 text-left flex-1"
+                              >
+                                {st.done ? (
+                                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                                ) : (
+                                  <Circle className="w-4 h-4 text-slate-400 shrink-0" />
+                                )}
+                                <span className={st.done ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200 font-medium'}>
+                                  {st.title}
+                                </span>
+                              </button>
+                              <button
+                                onClick={() => onDeleteProjectSubtask(project.id, st.id)}
+                                className="opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-rose-500 transition-opacity"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Add subtask inline input */}
+                        <div className="flex items-center gap-1.5 pt-1">
+                          <input
+                            type="text"
+                            placeholder="+ Add module or task..."
+                            value={newSubtaskTexts[project.id] || ''}
+                            onChange={(e) =>
+                              setNewSubtaskTexts((prev) => ({
+                                ...prev,
+                                [project.id]: e.target.value,
+                              }))
+                            }
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAddSubtaskInline(project.id);
+                              }
+                            }}
+                            className="flex-1 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                          />
+                          <button
+                            onClick={() => handleAddSubtaskInline(project.id)}
+                            className="px-2.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shrink-0"
+                          >
+                            Add
+                          </button>
+                        </div>
                       </div>
                     </div>
 
-                    {exam.syllabusNotes && (
-                      <p className="text-xs text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-950/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/80">
-                        <strong>Syllabus:</strong> {exam.syllabusNotes}
-                      </p>
-                    )}
-
-                    <div className="space-y-1">
-                      <div className="flex justify-between items-center text-xs text-slate-700 dark:text-slate-300 font-bold">
-                        <span>Syllabus Prepared</span>
-                        <span className="text-pink-600 dark:text-pink-400">{exam.prep}%</span>
+                    {/* Footer: Timeline & Done button */}
+                    <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>
+                          Target: {project.end} ({daysLeft > 0 ? `${daysLeft} days left` : daysLeft === 0 ? 'Due Today' : 'Past Due'})
+                        </span>
                       </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        step="5"
-                        value={exam.prep}
-                        onChange={(e) => onUpdateExamPrep(exam.id, parseInt(e.target.value))}
-                        className="w-full accent-pink-600 cursor-pointer"
-                      />
+
+                      <button
+                        onClick={() => {
+                          onEditProject({
+                            ...project,
+                            completed: !project.completed,
+                            progress: !project.completed ? 100 : project.progress,
+                          });
+                        }}
+                        className={`px-3 py-1 rounded-xl text-xs font-bold transition-colors ${
+                          project.completed
+                            ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-emerald-50 hover:text-emerald-600'
+                        }`}
+                      >
+                        {project.completed ? '✓ Completed' : 'Mark Complete'}
+                      </button>
                     </div>
                   </div>
                 );
@@ -365,513 +488,371 @@ export const AcademicPlannerView: React.FC<AcademicPlannerViewProps> = ({
         </div>
       )}
 
-      {/* Tab Content 2: Timetable */}
-      {activeTab === 'timetable' && (
+      {/* ===================== TAB 2: EXAM COUNTDOWN ===================== */}
+      {activeTab === 'exams' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white">Weekly Class Schedule</h3>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                Upcoming Examination Deadlines & Preparedness
+              </h3>
+              <p className="text-xs text-slate-500">
+                Keep track of test dates, syllabus goals, and preparedness levels.
+              </p>
+            </div>
             <button
               onClick={() => {
-                setEditingClass(null);
-                setClassSubject('');
-                setClassCode('');
-                setClassInstructor('');
-                setClassRoom('');
-                setIsAddClassModal(true);
+                setEditingExam(null);
+                setExamSubject('');
+                setExamDate('2026-08-25');
+                setExamWeight(30);
+                setExamSyllabusNotes('');
+                setIsAddExamModal(true);
               }}
-              className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md"
+              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/20 shrink-0"
             >
               <Plus className="w-4 h-4" />
-              <span>Add Class</span>
+              <span>Add Exam</span>
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-            {daysOfWeek.map((dayName, dayIndex) => {
-              const dayClasses = timetable.filter((c) => c.dayOfWeek === dayIndex);
-
-              return (
-                <div key={dayName} className="bg-slate-900 rounded-2xl p-3.5 border border-slate-800 space-y-2">
-                  <div className="pb-2 border-b border-slate-800 font-bold text-xs text-indigo-300 uppercase tracking-wider text-center">
-                    {dayName}
-                  </div>
-
-                  {dayClasses.length === 0 ? (
-                    <p className="text-[11px] text-slate-500 text-center py-4">No classes</p>
-                  ) : (
-                    dayClasses.map((cls) => (
-                      <div
-                        key={cls.id}
-                        className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5 relative group"
-                        style={{ borderLeftColor: cls.color || '#6366f1', borderLeftWidth: '4px' }}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="text-xs font-bold text-white">{cls.subject}</p>
-                            <p className="text-[10px] text-slate-400">{cls.code} • {cls.instructor}</p>
-                          </div>
-                          <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100">
-                            <button
-                              onClick={() => openEditClass(cls)}
-                              className="text-slate-400 hover:text-white"
-                              title="Edit Class"
-                            >
-                              <Edit3 className="w-3 h-3" />
-                            </button>
-                            <button
-                              onClick={() => onDeleteClassSession(cls.id)}
-                              className="text-rose-400 hover:text-rose-300"
-                              title="Delete Class"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="flex justify-between text-[10px] font-semibold text-slate-300 pt-1">
-                          <span>📍 {cls.room}</span>
-                          <span>⏰ {cls.startTime}</span>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Tab Content 3: Projects */}
-      {activeTab === 'projects' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white">Academic Projects & Lab Demos</h3>
-            <button
-              onClick={() => {
-                setEditingProject(null);
-                setProjectTitle('');
-                setProjectSubject('');
-                setIsAddProjectModal(true);
-              }}
-              className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Project</span>
-            </button>
-          </div>
-
-          {projects.length === 0 ? (
-            <div className="p-8 text-center bg-slate-900/60 rounded-2xl border border-dashed border-slate-800">
-              <p className="text-xs text-slate-400 font-medium">No projects added yet. Click "Add Project" to start tracking!</p>
+          {exams.length === 0 ? (
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-10 border border-dashed border-slate-300 dark:border-slate-700 text-center space-y-3">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                <GraduationCap className="w-7 h-7" />
+              </div>
+              <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
+                No Exams Scheduled
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                Add your upcoming school or university exams to view automatic countdowns and syllabus prep checklists.
+              </p>
+              <button
+                onClick={() => setIsAddExamModal(true)}
+                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-md"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Schedule Exam</span>
+              </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {projects.map((proj) => (
-                <div key={proj.id} className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h4 className="font-bold text-white text-base">{proj.title}</h4>
-                      <p className="text-xs text-slate-400">Due: {proj.end} {proj.subject ? `• ${proj.subject}` : ''}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-indigo-400">{proj.progress}% Done</span>
-                      <button
-                        onClick={() => openEditProject(proj)}
-                        className="p-1 rounded text-slate-400 hover:text-white"
-                        title="Edit Project"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => onDeleteProject(proj.id)}
-                        className="p-1 rounded text-rose-400 hover:text-rose-300"
-                        title="Delete Project"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {exams.map((exam) => {
+                const daysLeft = getDaysLeft(exam.date);
+                const isUrgent = daysLeft >= 0 && daysLeft <= 3;
+                const isPast = daysLeft < 0;
 
-                  <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-indigo-500 rounded-full"
-                      style={{ width: `${proj.progress}%` }}
-                    />
-                  </div>
+                return (
+                  <div
+                    key={exam.id}
+                    className={`bg-white dark:bg-slate-900 rounded-3xl p-5 border transition-all duration-200 shadow-sm flex flex-col justify-between space-y-4 ${
+                      isUrgent
+                        ? 'border-amber-400 dark:border-amber-600/80 bg-amber-50/15 dark:bg-amber-950/10'
+                        : isPast
+                        ? 'border-slate-200 dark:border-slate-800 opacity-70'
+                        : 'border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700'
+                    }`}
+                  >
+                    <div className="space-y-3">
+                      {/* Top Countdown Badge */}
+                      <div className="flex items-center justify-between gap-2">
+                        <span className={`px-2.5 py-1 rounded-xl text-xs font-black flex items-center gap-1.5 ${
+                          isUrgent
+                            ? 'bg-amber-500 text-white shadow-sm'
+                            : isPast
+                            ? 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                            : 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800'
+                        }`}>
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>
+                            {daysLeft > 0
+                              ? `⏳ In ${daysLeft} Day${daysLeft === 1 ? '' : 's'}`
+                              : daysLeft === 0
+                              ? '🚨 Exam Today!'
+                              : `Passed (${Math.abs(daysLeft)}d ago)`}
+                          </span>
+                        </span>
 
-                  {/* Subtasks List */}
-                  <div className="space-y-2 pt-2 border-t border-slate-800/80">
-                    <p className="text-[11px] font-bold text-slate-400">Milestones / Subtasks:</p>
-                    {proj.subtasks && proj.subtasks.map((st) => (
-                      <div
-                        key={st.id}
-                        className="flex items-center justify-between text-xs text-slate-300"
-                      >
-                        <div
-                          onClick={() => onToggleProjectSubtask(proj.id, st.id)}
-                          className="flex items-center gap-2 cursor-pointer hover:text-white"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={st.done}
-                            readOnly
-                            className="w-3.5 h-3.5 rounded bg-slate-800 border-slate-700 accent-indigo-600"
-                          />
-                          <span className={st.done ? 'line-through text-slate-500' : ''}>{st.title}</span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => openEditExam(exam)}
+                            className="p-1 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            title="Edit"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => onDeleteExam(exam.id)}
+                            className="p-1 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
-                        <button
-                          onClick={() => onDeleteProjectSubtask(proj.id, st.id)}
-                          className="text-slate-500 hover:text-rose-400"
-                          title="Delete subtask"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
                       </div>
-                    ))}
 
-                    {/* Inline Subtask Adder */}
-                    <div className="flex items-center gap-2 pt-1">
-                      <input
-                        type="text"
-                        placeholder="New milestone..."
-                        value={newSubtaskTexts[proj.id] || ''}
-                        onChange={(e) => setNewSubtaskTexts({ ...newSubtaskTexts, [proj.id]: e.target.value })}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleAddSubtaskClick(proj.id);
-                          }
-                        }}
-                        className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-indigo-500"
-                      />
-                      <button
-                        onClick={() => handleAddSubtaskClick(proj.id)}
-                        className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs"
-                      >
-                        Add
-                      </button>
+                      {/* Subject Name */}
+                      <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                        {exam.subject}
+                      </h4>
+
+                      {/* Exam Date */}
+                      <div className="text-xs text-slate-500 flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-indigo-500" />
+                        <span>Date: {exam.date}</span>
+                        {exam.weight && (
+                          <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400 ml-1">
+                            ({exam.weight}% weight)
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Syllabus notes */}
+                      {exam.syllabusNotes && (
+                        <p className="text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                          {exam.syllabusNotes}
+                        </p>
+                      )}
+
+                      {/* Prep Slider */}
+                      <div className="space-y-1 pt-1">
+                        <div className="flex items-center justify-between text-xs font-bold">
+                          <span className="text-slate-600 dark:text-slate-400">Preparation Level</span>
+                          <span className="text-indigo-600 dark:text-indigo-400">{exam.prep}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={exam.prep}
+                          onChange={(e) => onUpdateExamPrep(exam.id, Number(e.target.value))}
+                          className="w-full accent-indigo-600 cursor-pointer h-2 bg-slate-200 dark:bg-slate-700 rounded-lg"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
       )}
 
-      {/* Tab Content 4: GPA Calculator */}
-      {activeTab === 'gpa' && (
-        <div className="space-y-4">
-          <h3 className="text-sm font-bold text-white">Course Grade Tracker & Expected GPA</h3>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {courses.map((course) => (
-              <div key={course.id} className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-bold text-white text-sm">{course.courseName}</h4>
-                  <span className="text-xs font-black text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                    Target: {course.targetGrade}
-                  </span>
-                </div>
-
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-black text-white">{course.currentScore}%</span>
-                  <span className="text-xs text-slate-400">Current Average</span>
-                </div>
-
-                <div className="space-y-1 pt-2 border-t border-slate-800/80">
-                  <p className="text-[11px] font-bold text-slate-400">Assignments Logged:</p>
-                  {course.assignments.map((a) => (
-                    <div key={a.id} className="flex justify-between text-xs text-slate-300">
-                      <span>{a.name}</span>
-                      <span className="font-mono text-indigo-300">{a.score}/{a.maxScore} ({a.weight}%)</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Modal 1: Add / Edit Exam */}
-      {isAddExamModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl relative">
-            <button
-              onClick={() => setIsAddExamModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <GraduationCap className="w-5 h-5 text-pink-400" />
-              {editingExam ? 'Edit Exam' : 'Add Upcoming Exam'}
-            </h3>
-
-            <form onSubmit={handleCreateExam} className="space-y-4 text-xs">
-              <div>
-                <label className="block text-slate-300 font-bold mb-1">Course / Subject Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={examSubject}
-                  onChange={(e) => setExamSubject(e.target.value)}
-                  placeholder="e.g. Physics II (Electromagnetism)"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-pink-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Exam Date</label>
-                  <input
-                    type="date"
-                    required
-                    value={examDate}
-                    onChange={(e) => setExamDate(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-pink-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Weight (% of Grade)</label>
-                  <input
-                    type="number"
-                    value={examWeight}
-                    onChange={(e) => setExamWeight(parseInt(e.target.value) || 30)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-pink-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-bold mb-1">Syllabus Topics</label>
-                <textarea
-                  rows={2}
-                  value={examSyllabusNotes}
-                  onChange={(e) => setExamSyllabusNotes(e.target.value)}
-                  placeholder="e.g. Chapters 4 to 8, Gauss Law, Circuit proofs"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-pink-500"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setIsAddExamModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-bold shadow-lg shadow-pink-500/20"
-                >
-                  Save Exam
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal 2: Add / Edit Class Session */}
-      {isAddClassModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl relative">
-            <button
-              onClick={() => setIsAddClassModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-indigo-400" />
-              {editingClass ? 'Edit Class Session' : 'Add Timetable Class'}
-            </h3>
-
-            <form onSubmit={handleCreateClass} className="space-y-3 text-xs">
-              <div>
-                <label className="block text-slate-300 font-bold mb-1">Subject Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={classSubject}
-                  onChange={(e) => setClassSubject(e.target.value)}
-                  placeholder="e.g. Calculus III"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Course Code</label>
-                  <input
-                    type="text"
-                    value={classCode}
-                    onChange={(e) => setClassCode(e.target.value)}
-                    placeholder="e.g. MATH301"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Instructor</label>
-                  <input
-                    type="text"
-                    value={classInstructor}
-                    onChange={(e) => setClassInstructor(e.target.value)}
-                    placeholder="e.g. Dr. Ahmad"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Room / Hall</label>
-                  <input
-                    type="text"
-                    value={classRoom}
-                    onChange={(e) => setClassRoom(e.target.value)}
-                    placeholder="e.g. Hall B-102"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Day of Week</label>
-                  <select
-                    value={classDayOfWeek}
-                    onChange={(e) => setClassDayOfWeek(Number(e.target.value))}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
-                  >
-                    <option value={0}>Monday</option>
-                    <option value={1}>Tuesday</option>
-                    <option value={2}>Wednesday</option>
-                    <option value={3}>Thursday</option>
-                    <option value={4}>Friday</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">Start Time</label>
-                  <input
-                    type="time"
-                    value={classStartTime}
-                    onChange={(e) => setClassStartTime(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1">End Time</label>
-                  <input
-                    type="time"
-                    value={classEndTime}
-                    onChange={(e) => setClassEndTime(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsAddClassModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold"
-                >
-                  Save Class
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal 3: Add / Edit Project */}
+      {/* ===================== MODAL: ADD / EDIT PROJECT ===================== */}
       {isAddProjectModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl relative">
-            <button
-              onClick={() => setIsAddProjectModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                  <Code className="w-4 h-4" />
+                </div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                  {editingProject ? 'Edit Project / Course' : 'Create New Project or Course'}
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsAddProjectModal(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <Layers className="w-5 h-5 text-purple-400" />
-              {editingProject ? 'Edit Project' : 'Add Academic Project'}
-            </h3>
-
-            <form onSubmit={handleCreateProject} className="space-y-3 text-xs">
+            <form onSubmit={handleSaveProject} className="space-y-4">
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Project Title *</label>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Project or Course Title *
+                </label>
                 <input
                   type="text"
                   required
+                  placeholder="e.g. Build Flutter Mobile App, Python AI Course, Quran Tajweed..."
                   value={projectTitle}
                   onChange={(e) => setProjectTitle(e.target.value)}
-                  placeholder="e.g. Autonomous Drone Science Demo"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-bold mb-1">Subject / Course</label>
-                <input
-                  type="text"
-                  value={projectSubject}
-                  onChange={(e) => setProjectSubject(e.target.value)}
-                  placeholder="e.g. Robotics"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-bold mb-1">Start Date</label>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={projectType}
+                    onChange={(e) => setProjectType(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="App Development">App Development</option>
+                    <option value="Online Course">Online Course</option>
+                    <option value="Skill Learning">Skill Learning</option>
+                    <option value="Exam Prep">Exam Prep</option>
+                    <option value="Personal Project">Personal Project</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Subject / Domain
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Coding, Math, Deen..."
+                    value={projectSubject}
+                    onChange={(e) => setProjectSubject(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Start Date
+                  </label>
                   <input
                     type="date"
                     value={projectStart}
                     onChange={(e) => setProjectStart(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-300 font-bold mb-1">Due Date</label>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Target End Date
+                  </label>
                   <input
                     type="date"
                     value={projectEnd}
                     onChange={(e) => setProjectEnd(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Notes, Links, or Tech Stack
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. React Native, TypeScript, lecture video links, book chapters..."
+                  value={projectNotes}
+                  onChange={(e) => setProjectNotes(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsAddProjectModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold"
+                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md"
                 >
-                  Save Project
+                  {editingProject ? 'Save Changes' : 'Create Project'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ===================== MODAL: ADD / EDIT EXAM ===================== */}
+      {isAddExamModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                  <GraduationCap className="w-4 h-4" />
+                </div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                  {editingExam ? 'Edit Exam' : 'Schedule New Exam'}
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsAddExamModal(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveExam} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Subject / Exam Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Mathematics Final, Physics Chapter 1-5..."
+                  value={examSubject}
+                  onChange={(e) => setExamSubject(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Exam Date
+                  </label>
+                  <input
+                    type="date"
+                    value={examDate}
+                    onChange={(e) => setExamDate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Weight (%)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={examWeight}
+                    onChange={(e) => setExamWeight(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Syllabus / Focus Chapters
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. Chapters 4, 5, 6 formulas and theorem proofs..."
+                  value={examSyllabusNotes}
+                  onChange={(e) => setExamSyllabusNotes(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsAddExamModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md"
+                >
+                  {editingExam ? 'Save Changes' : 'Schedule Exam'}
                 </button>
               </div>
             </form>

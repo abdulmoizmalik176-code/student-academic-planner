@@ -6,7 +6,8 @@ import {
   Trash2, 
   Calendar, 
   Sparkles,
-  X
+  X,
+  Edit3
 } from 'lucide-react';
 import { Habit } from '../types';
 
@@ -15,6 +16,7 @@ interface HabitsViewProps {
   onAddHabit: (newHabit: Omit<Habit, 'id' | 'log'>) => void;
   onToggleHabitDay: (habitId: string, dateStr: string) => void;
   onDeleteHabit: (habitId: string) => void;
+  onEditHabit?: (habitId: string, updated: Partial<Habit>) => void;
 }
 
 export const HabitsView: React.FC<HabitsViewProps> = ({
@@ -22,8 +24,10 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
   onAddHabit,
   onToggleHabitDay,
   onDeleteHabit,
+  onEditHabit,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [name, setName] = useState('');
   const [category, setCategory] = useState<'Study' | 'Health' | 'Spiritual' | 'Personal'>('Study');
   const [color, setColor] = useState('#6366f1');
@@ -40,18 +44,45 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
     };
   });
 
-  const handleCreateHabit = (e: React.FormEvent) => {
+  const handleOpenAddModal = () => {
+    setEditingHabit(null);
+    setName('');
+    setCategory('Study');
+    setColor('#6366f1');
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (habit: Habit) => {
+    setEditingHabit(habit);
+    setName(habit.name);
+    setCategory(habit.category || 'Study');
+    setColor(habit.color || '#6366f1');
+    setIsModalOpen(true);
+  };
+
+  const handleSaveHabit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    onAddHabit({
-      name,
-      category,
-      color,
-      days: [true, true, true, true, true, true, true],
-    });
+    if (editingHabit && onEditHabit) {
+      onEditHabit(editingHabit.id, {
+        name: name.trim(),
+        category,
+        color,
+      });
+    } else {
+      onAddHabit({
+        name: name.trim(),
+        category,
+        color,
+        days: [true, true, true, true, true, true, true],
+      });
+    }
 
+    setEditingHabit(null);
     setName('');
+    setCategory('Study');
+    setColor('#6366f1');
     setIsModalOpen(false);
   };
 
@@ -65,11 +96,13 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
             <Flame className="w-6 h-6 text-amber-500 dark:text-amber-400 fill-amber-500" />
             Habit Consistency & Heatmaps
           </h2>
-          <p className="text-xs text-slate-600 dark:text-slate-400">Build long-term study and personal discipline with daily tracking</p>
+          <p className="text-xs text-slate-600 dark:text-slate-400">
+            Build long-term study and personal discipline with daily tracking
+          </p>
         </div>
 
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleOpenAddModal}
           className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all"
         >
           <Plus className="w-4 h-4" />
@@ -111,38 +144,55 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => onDeleteHabit(habit.id)}
-                    className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs border border-rose-500/20"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleOpenEditModal(habit)}
+                      className="p-2 text-slate-400 hover:text-amber-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                      title="Edit habit"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (window.confirm(`Delete habit "${habit.name}"?`)) {
+                          onDeleteHabit(habit.id);
+                        }
+                      }}
+                      className="p-2 text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                      title="Delete habit"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
-                {/* Past 7 Days Heatmap Buttons */}
-                <div className="grid grid-cols-7 gap-2">
-                  {past7Days.map((d) => {
-                    const isDone = habit.log.includes(d.dateStr);
+                {/* 7-Day Consistency Grid */}
+                <div>
+                  <div className="flex items-center justify-between gap-1 sm:gap-2">
+                    {past7Days.map((day) => {
+                      const isDone = habit.log.includes(day.dateStr);
 
-                    return (
-                      <button
-                        key={d.dateStr}
-                        onClick={() => onToggleHabitDay(habit.id, d.dateStr)}
-                        className={`p-2.5 rounded-xl border flex flex-col items-center justify-center transition-all ${
-                          isDone
-                            ? 'text-white shadow-md scale-105 border-transparent'
-                            : 'bg-slate-950/60 border-slate-800 text-slate-500 hover:border-slate-700'
-                        }`}
-                        style={{
-                          backgroundColor: isDone ? habit.color : undefined,
-                        }}
-                      >
-                        <span className="text-[10px] uppercase font-bold opacity-80">{d.dayName}</span>
-                        <span className="text-xs font-black">{d.dateNum}</span>
-                        {isDone && <Check className="w-3.5 h-3.5 mt-0.5 stroke-[3]" />}
-                      </button>
-                    );
-                  })}
+                      return (
+                        <div key={day.dateStr} className="flex-1 flex flex-col items-center gap-1.5">
+                          <span className="text-[10px] text-slate-400 font-bold uppercase">{day.dayName}</span>
+                          <button
+                            onClick={() => onToggleHabitDay(habit.id, day.dateStr)}
+                            className={`w-full aspect-square max-w-[40px] rounded-xl flex items-center justify-center transition-all ${
+                              isDone
+                                ? 'text-white shadow-md'
+                                : 'bg-slate-100 dark:bg-slate-800 text-transparent border border-slate-200 dark:border-slate-700 hover:border-slate-400'
+                            }`}
+                            style={{
+                              backgroundColor: isDone ? habit.color : undefined,
+                            }}
+                          >
+                            {isDone && <Check className="w-4 h-4 stroke-[3]" />}
+                          </button>
+                          <span className="text-[10px] text-slate-500">{day.dateNum}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             );
@@ -150,41 +200,49 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
         )}
       </div>
 
-      {/* Add Habit Modal */}
+      {/* Add / Edit Habit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl relative">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <div 
+          className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-sm flex min-h-full items-center justify-center p-4 text-center overscroll-contain"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 p-6 text-left shadow-2xl border border-slate-200 dark:border-slate-800 transition-all my-auto"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
+              <h3 className="text-base font-black text-slate-900 dark:text-white">
+                {editingHabit ? 'Edit Habit' : 'Add Custom Habit'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-amber-400" />
-              Create Custom Habit
-            </h3>
-
-            <form onSubmit={handleCreateHabit} className="space-y-4 text-xs">
+            <form onSubmit={handleSaveHabit} className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Habit Name *</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Habit Name *</label>
                 <input
                   type="text"
                   required
+                  autoComplete="off"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Read 15 Pages of Physics Textbook"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Category</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-1">Category</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value as any)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-amber-500"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
                   <option value="Study">Study & Academics</option>
                   <option value="Health">Health & Wellness</option>
@@ -194,7 +252,7 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-slate-300 font-bold mb-2">Accent Color</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-bold mb-2">Accent Color</label>
                 <div className="flex items-center gap-3">
                   {colorOptions.map((c) => (
                     <button
@@ -202,7 +260,7 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
                       type="button"
                       onClick={() => setColor(c)}
                       className={`w-7 h-7 rounded-full transition-transform ${
-                        color === c ? 'scale-125 ring-2 ring-white' : ''
+                        color === c ? 'scale-125 ring-2 ring-indigo-500 dark:ring-white' : ''
                       }`}
                       style={{ backgroundColor: c }}
                     />
@@ -214,7 +272,7 @@ export const HabitsView: React.FC<HabitsViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold"
                 >
                   Cancel
                 </button>

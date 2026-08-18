@@ -4,11 +4,10 @@ import { BottomNav } from './components/BottomNav';
 import { DashboardView } from './components/DashboardView';
 import { TasksView } from './components/TasksView';
 import { HabitsView } from './components/HabitsView';
-import { StudyFocusView } from './components/StudyFocusView';
+import { SelfReflectionView } from './components/SelfReflectionView';
 import { IslamicTrackerView } from './components/IslamicTrackerView';
 import { AcademicPlannerView } from './components/AcademicPlannerView';
 import { TimetableMasterView } from './components/TimetableMasterView';
-import { AiAssistantView } from './components/AiAssistantView';
 import { AnalyticsView } from './components/AnalyticsView';
 import { IdeaGuideModal } from './components/IdeaGuideModal';
 
@@ -21,7 +20,10 @@ import {
   CourseGrade, 
   UserStats, 
   ActiveTab, 
-  DailyMoodNote 
+  DailyMoodNote,
+  CharacterTrait,
+  MuhasabaEntry,
+  EntertainmentLogEntry
 } from './types';
 
 import { 
@@ -32,6 +34,9 @@ import {
   INITIAL_TIMETABLE, 
   INITIAL_COURSES, 
   INITIAL_USER_STATS, 
+  INITIAL_CHARACTER_TRAITS,
+  INITIAL_MUHASABA_HISTORY,
+  INITIAL_ENTERTAINMENT_HISTORY,
   TODAY_STR 
 } from './data/initialData';
 
@@ -48,6 +53,11 @@ export default function App() {
   const [habits, setHabits] = useState<Habit[]>(() => {
     const saved = localStorage.getItem('student_routine_habits');
     return saved ? JSON.parse(saved) : INITIAL_HABITS;
+  });
+
+  const [traits, setTraits] = useState<CharacterTrait[]>(() => {
+    const saved = localStorage.getItem('student_routine_traits');
+    return saved ? JSON.parse(saved) : INITIAL_CHARACTER_TRAITS;
   });
 
   const [exams, setExams] = useState<Exam[]>(() => {
@@ -85,11 +95,24 @@ export default function App() {
     return saved ? JSON.parse(saved) : [TODAY_STR];
   });
 
+  const [daroodLog, setDaroodLog] = useState<Record<string, number>>(() => {
+    const saved = localStorage.getItem('student_routine_darood');
+    return saved ? JSON.parse(saved) : { [TODAY_STR]: 100 };
+  });
+
   const [notesHistory, setNotesHistory] = useState<Record<string, DailyMoodNote>>(() => {
     const saved = localStorage.getItem('student_routine_notes');
-    return saved ? JSON.parse(saved) : {
-      [TODAY_STR]: { date: TODAY_STR, mood: 'Productive', note: 'Reviewed Physics Ch. 4 and completed Calculus assignment.' }
-    };
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  const [muhasabaHistory, setMuhasabaHistory] = useState<MuhasabaEntry[]>(() => {
+    const saved = localStorage.getItem('student_routine_muhasaba_history');
+    return saved ? JSON.parse(saved) : INITIAL_MUHASABA_HISTORY;
+  });
+
+  const [entertainmentHistory, setEntertainmentHistory] = useState<EntertainmentLogEntry[]>(() => {
+    const saved = localStorage.getItem('student_routine_entertainment_history');
+    return saved ? JSON.parse(saved) : INITIAL_ENTERTAINMENT_HISTORY;
   });
 
   // Sync to LocalStorage
@@ -102,8 +125,16 @@ export default function App() {
   }, [habits]);
 
   useEffect(() => {
+    localStorage.setItem('student_routine_traits', JSON.stringify(traits));
+  }, [traits]);
+
+  useEffect(() => {
     localStorage.setItem('student_routine_exams', JSON.stringify(exams));
   }, [exams]);
+
+  useEffect(() => {
+    localStorage.setItem('student_routine_timetable', JSON.stringify(timetable));
+  }, [timetable]);
 
   useEffect(() => {
     localStorage.setItem('student_routine_projects', JSON.stringify(projects));
@@ -127,31 +158,47 @@ export default function App() {
   }, [quranLog]);
 
   useEffect(() => {
+    localStorage.setItem('student_routine_darood', JSON.stringify(daroodLog));
+  }, [daroodLog]);
+
+  useEffect(() => {
     localStorage.setItem('student_routine_notes', JSON.stringify(notesHistory));
   }, [notesHistory]);
 
-  // Dynamic Daily Streak Calculation
   useEffect(() => {
-    const getActivityCountForDate = (dateStr: string) => {
-      const namazCount = (namazLog[dateStr] || []).length;
-      const quranCount = quranLog.includes(dateStr) ? 1 : 0;
-      const tasksCount = tasks.filter((t) => t.doneDates && t.doneDates.includes(dateStr)).length;
-      const habitsCount = habits.filter((h) => h.log && h.log.includes(dateStr)).length;
-      return namazCount + quranCount + tasksCount + habitsCount;
+    localStorage.setItem('student_routine_muhasaba_history', JSON.stringify(muhasabaHistory));
+  }, [muhasabaHistory]);
+
+  useEffect(() => {
+    localStorage.setItem('student_routine_entertainment_history', JSON.stringify(entertainmentHistory));
+  }, [entertainmentHistory]);
+
+  // Streak Calculation Logic
+  // Streak continues and increments when 5 Namaz, Quran, and Tasks are completed
+  useEffect(() => {
+    const isDayFullyComplete = (dateStr: string) => {
+      const prayersDone = (namazLog[dateStr] || []).length >= 5;
+      const quranRecited = quranLog.includes(dateStr);
+      
+      const dayTasks = tasks.filter((t) => t.dateAdded === dateStr || t.recurring);
+      const doneDayTasks = tasks.filter((t) => t.doneDates && t.doneDates.includes(dateStr));
+      const tasksCompleted = dayTasks.length > 0 ? doneDayTasks.length === dayTasks.length : true;
+
+      return prayersDone && quranRecited && tasksCompleted;
     };
 
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
-    const todayActivity = getActivityCountForDate(todayStr);
+    const todayDone = isDayFullyComplete(todayStr);
 
     let calculatedStreak = 0;
     let checkDate = new Date(today);
 
-    if (todayActivity >= 1) {
-      // Today has at least 1 completed task/prayer/quran/habit
+    if (todayDone) {
+      // Today is complete, count backwards
       while (true) {
         const dStr = checkDate.toISOString().split('T')[0];
-        if (getActivityCountForDate(dStr) >= 1) {
+        if (isDayFullyComplete(dStr)) {
           calculatedStreak++;
           checkDate.setDate(checkDate.getDate() - 1);
         } else {
@@ -159,11 +206,11 @@ export default function App() {
         }
       }
     } else {
-      // Today not active yet, check starting from yesterday
+      // Check from yesterday to maintain existing streak if today is still in progress
       checkDate.setDate(checkDate.getDate() - 1);
       while (true) {
         const dStr = checkDate.toISOString().split('T')[0];
-        if (getActivityCountForDate(dStr) >= 1) {
+        if (isDayFullyComplete(dStr)) {
           calculatedStreak++;
           checkDate.setDate(checkDate.getDate() - 1);
         } else {
@@ -175,7 +222,7 @@ export default function App() {
     if (stats.streak !== calculatedStreak) {
       setStats((prev) => ({ ...prev, streak: calculatedStreak }));
     }
-  }, [tasks, namazLog, quranLog, habits, stats.streak]);
+  }, [tasks, namazLog, quranLog, stats.streak]);
 
   // Entertainment Timer Countdown
   useEffect(() => {
@@ -191,7 +238,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, [stats.entTimerRunning, stats.entTimeLeft]);
 
-  // Handlers
+  // Handlers - Tasks
   const handleToggleTask = (taskId: string) => {
     setTasks((prev) =>
       prev.map((t) => {
@@ -200,11 +247,6 @@ export default function App() {
           const newDoneDates = isDone
             ? t.doneDates.filter((d) => d !== TODAY_STR)
             : [...t.doneDates, TODAY_STR];
-
-          // Award XP
-          if (!isDone) {
-            setStats((s) => ({ ...s, points: s.points + 10 }));
-          }
 
           return {
             ...t,
@@ -224,11 +266,14 @@ export default function App() {
       doneDates: [],
     };
     setTasks((prev) => [newTask, ...prev]);
-    setStats((s) => ({ ...s, points: s.points + 5 }));
   };
 
   const handleDeleteTask = (taskId: string) => {
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
+  };
+
+  const handleEditTask = (updatedTask: Task) => {
+    setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
   };
 
   const handleUpdateTaskProgress = (taskId: string, progress: number) => {
@@ -248,6 +293,7 @@ export default function App() {
     );
   };
 
+  // Habits Handlers
   const handleAddHabit = (newHabitData: Omit<Habit, 'id' | 'log'>) => {
     const newHabit: Habit = {
       ...newHabitData,
@@ -257,13 +303,16 @@ export default function App() {
     setHabits((prev) => [...prev, newHabit]);
   };
 
+  const handleEditHabit = (habitId: string, updatedFields: Partial<Habit>) => {
+    setHabits((prev) => prev.map((h) => (h.id === habitId ? { ...h, ...updatedFields } : h)));
+  };
+
   const handleToggleHabitDay = (habitId: string, dateStr: string) => {
     setHabits((prev) =>
       prev.map((h) => {
         if (h.id === habitId) {
           const isLogged = h.log.includes(dateStr);
           const newLog = isLogged ? h.log.filter((d) => d !== dateStr) : [...h.log, dateStr];
-          if (!isLogged) setStats((s) => ({ ...s, points: s.points + 5 }));
           return { ...h, log: newLog };
         }
         return h;
@@ -275,6 +324,7 @@ export default function App() {
     setHabits((prev) => prev.filter((h) => h.id !== habitId));
   };
 
+  // Namaz, Quran & Durood Handlers
   const handleToggleNamaz = (prayerName: string) => {
     setNamazLog((prev) => {
       const todayPrayers = prev[TODAY_STR] || [];
@@ -283,7 +333,6 @@ export default function App() {
         ? todayPrayers.filter((p) => p !== prayerName)
         : [...todayPrayers, prayerName];
 
-      if (!isLogged) setStats((s) => ({ ...s, points: s.points + 15 }));
       return { ...prev, [TODAY_STR]: updated };
     });
   };
@@ -291,18 +340,161 @@ export default function App() {
   const handleToggleQuran = () => {
     setQuranLog((prev) => {
       const isLogged = prev.includes(TODAY_STR);
-      if (!isLogged) setStats((s) => ({ ...s, points: s.points + 20 }));
       return isLogged ? prev.filter((d) => d !== TODAY_STR) : [...prev, TODAY_STR];
     });
   };
 
-  const handleToggleEntTimer = () => {
-    setStats((prev) => ({
-      ...prev,
-      entTimerRunning: !prev.entTimerRunning,
-    }));
+  const handleToggleDarood = () => {
+    setDaroodLog((prev) => {
+      const current = prev[TODAY_STR] || 0;
+      const isCurrentlyDone = current > 0;
+      const newCount = isCurrentlyDone ? 0 : 500;
+      return { ...prev, [TODAY_STR]: newCount };
+    });
+    setMuhasabaHistory((prev) => {
+      const existing = prev.find((m) => m.date === TODAY_STR);
+      if (existing) {
+        const isCurrentlyDone = (existing.daroodCount || 0) > 0;
+        return prev.map((m) => (m.id === existing.id ? { ...m, daroodCount: isCurrentlyDone ? 0 : 500 } : m));
+      }
+      return prev;
+    });
   };
 
+  const handleUpdateDarood = (count: number) => {
+    setDaroodLog((prev) => ({ ...prev, [TODAY_STR]: count }));
+    // Sync into today's muhasaba record if present
+    setMuhasabaHistory((prev) => {
+      const existing = prev.find((m) => m.date === TODAY_STR);
+      if (existing) {
+        return prev.map((m) => (m.id === existing.id ? { ...m, daroodCount: count } : m));
+      }
+      return prev;
+    });
+  };
+
+  // Entertainment Log Handlers
+  const handleLogEntertainment = (newEntryData: Omit<EntertainmentLogEntry, 'id'>) => {
+    const newEntry: EntertainmentLogEntry = {
+      ...newEntryData,
+      id: `ent_${Date.now()}`,
+    };
+    setEntertainmentHistory((prev) => [
+      newEntry,
+      ...prev.filter((e) => e.date !== newEntryData.date),
+    ]);
+  };
+
+  const handleDeleteEntertainmentEntry = (id: string) => {
+    setEntertainmentHistory((prev) => prev.filter((e) => e.id !== id));
+  };
+
+  // Character Trait Handlers
+  const handleAddTrait = (newTraitData: Omit<CharacterTrait, 'id'>) => {
+    const newTrait: CharacterTrait = {
+      ...newTraitData,
+      id: `trait_${Date.now()}`,
+    };
+    setTraits((prev) => [newTrait, ...prev]);
+  };
+
+  const handleUpdateTrait = (updated: CharacterTrait) => {
+    setTraits((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+  };
+
+  const handleDeleteTrait = (id: string) => {
+    setTraits((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const handleLogPracticeOrClean = (id: string) => {
+    setTraits((prev) =>
+      prev.map((t) => {
+        if (t.id === id) {
+          const nextDays = (t.daysCleanOrPracticed || 0) + 1;
+          const nextProgress = Math.min(100, (t.progressPercentage || 50) + 5);
+          const history = t.historyDates || [];
+          const updatedHistory = history.includes(TODAY_STR) ? history : [...history, TODAY_STR];
+          return {
+            ...t,
+            daysCleanOrPracticed: nextDays,
+            progressPercentage: nextProgress,
+            trend: 'improving',
+            lastUpdatedDate: TODAY_STR,
+            historyDates: updatedHistory,
+          };
+        }
+        return t;
+      })
+    );
+  };
+
+  const handleMarkRelapseOrSlip = (id: string) => {
+    setTraits((prev) =>
+      prev.map((t) => {
+        if (t.id === id) {
+          const nextProgress = Math.max(0, (t.progressPercentage || 50) - 15);
+          return {
+            ...t,
+            daysCleanOrPracticed: 0,
+            progressPercentage: nextProgress,
+            trend: 'worsening',
+            status: t.type === 'good' ? 'slipping' : 'relapsed',
+            lastUpdatedDate: TODAY_STR,
+          };
+        }
+        return t;
+      })
+    );
+  };
+
+  // Muhasaba & Mood Handlers
+  const handleAddMuhasabaEntry = (newEntryData: Omit<MuhasabaEntry, 'id'>) => {
+    const newEntry: MuhasabaEntry = {
+      ...newEntryData,
+      id: `muh_${Date.now()}`,
+    };
+    setMuhasabaHistory((prev) => [
+      newEntry,
+      ...prev.filter((m) => !(m.date === newEntryData.date && m.time === newEntryData.time)),
+    ]);
+    if (newEntryData.daroodCount !== undefined) {
+      setDaroodLog((prev) => ({ ...prev, [newEntryData.date]: newEntryData.daroodCount || 0 }));
+    }
+  };
+
+  const handleUpdateMuhasabaEntry = (updated: MuhasabaEntry) => {
+    setMuhasabaHistory((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
+    if (updated.daroodCount !== undefined) {
+      setDaroodLog((prev) => ({ ...prev, [updated.date]: updated.daroodCount || 0 }));
+    }
+  };
+
+  const handleDeleteMuhasabaEntry = (id: string) => {
+    setMuhasabaHistory((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const handleToggleEntTimer = () => {
+    setStats((prev) => {
+      const nextRunning = !prev.entTimerRunning;
+      if (nextRunning) {
+        handleLogEntertainment({
+          date: TODAY_STR,
+          status: 'enjoyed',
+          minutesUsed: 60,
+          activityNote: 'Break timer started from dashboard',
+          unlockedTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          prayersCount: (namazLog[TODAY_STR] || []).length,
+          tasksCompletedCount: tasks.filter((t) => t.doneDates.includes(TODAY_STR)).length
+        });
+      }
+      return {
+        ...prev,
+        entTimerRunning: nextRunning,
+      };
+    });
+  };
+
+  // Exam & Academic Handlers
   const handleAddExam = (newExamData: Omit<Exam, 'id'>) => {
     const newExam: Exam = {
       ...newExamData,
@@ -338,8 +530,8 @@ export default function App() {
     setTimetable((prev) => prev.filter((c) => c.id !== sessionId));
   };
 
-  const handleEditClassSession = (updatedSession: ClassSession) => {
-    setTimetable((prev) => prev.map((c) => (c.id === updatedSession.id ? updatedSession : c)));
+  const handleEditClassSession = (sessionId: string, updatedFields: Partial<ClassSession>) => {
+    setTimetable((prev) => prev.map((c) => (c.id === sessionId ? { ...c, ...updatedFields } : c)));
   };
 
   const handleClearAllClassSessions = () => {
@@ -438,21 +630,10 @@ export default function App() {
     }));
   };
 
-  const handleLogWater = () => {
-    setStats((prev) => {
-      const current = prev.waterGlasses || 0;
-      const updated = current >= 8 ? 0 : current + 1;
-      const pointsBonus = updated === 8 ? 20 : 5;
-      return {
-        ...prev,
-        waterGlasses: updated,
-        points: prev.points + pointsBonus,
-      };
-    });
-  };
-
   const todayNamazCount = (namazLog[TODAY_STR] || []).length;
   const isQuranDone = quranLog.includes(TODAY_STR);
+  const todayDaroodCount = daroodLog[TODAY_STR] || 0;
+  const isDaroodDone = todayDaroodCount > 0;
 
   return (
     <div className={`min-h-screen ${stats.dark_mode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-900'} font-sans antialiased transition-colors duration-200`}>
@@ -471,13 +652,13 @@ export default function App() {
           <DashboardView
             tasks={tasks}
             stats={stats}
-            exams={exams}
+            timetable={timetable}
             onToggleTask={handleToggleTask}
             onSelectTab={setActiveTab}
             onToggleEntTimer={handleToggleEntTimer}
             namazCount={todayNamazCount}
             quranDone={isQuranDone}
-            onLogWater={handleLogWater}
+            daroodCount={todayDaroodCount}
           />
         )}
 
@@ -488,32 +669,7 @@ export default function App() {
             onToggleTask={handleToggleTask}
             onDeleteTask={handleDeleteTask}
             onUpdateTaskProgress={handleUpdateTaskProgress}
-          />
-        )}
-
-        {activeTab === 'habits' && (
-          <HabitsView
-            habits={habits}
-            onAddHabit={handleAddHabit}
-            onToggleHabitDay={handleToggleHabitDay}
-            onDeleteHabit={handleDeleteHabit}
-          />
-        )}
-
-        {activeTab === 'focus' && (
-          <StudyFocusView
-            onAddStudyXP={(mins) => setStats((s) => ({ ...s, points: s.points + mins * 2 }))}
-          />
-        )}
-
-        {activeTab === 'islamic' && (
-          <IslamicTrackerView
-            city={stats.city}
-            onChangeCity={(newCity) => setStats((s) => ({ ...s, city: newCity }))}
-            namazLog={namazLog[TODAY_STR] || []}
-            quranDone={isQuranDone}
-            onToggleNamaz={handleToggleNamaz}
-            onToggleQuran={handleToggleQuran}
+            onEditTask={handleEditTask}
           />
         )}
 
@@ -527,37 +683,77 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'academic' && (
-          <AcademicPlannerView
-            exams={exams}
-            projects={projects}
-            timetable={timetable}
-            courses={courses}
-            onAddExam={handleAddExam}
-            onDeleteExam={handleDeleteExam}
-            onEditExam={handleEditExam}
-            onUpdateExamPrep={handleUpdateExamPrep}
-            onAddClassSession={handleAddClassSession}
-            onDeleteClassSession={handleDeleteClassSession}
-            onEditClassSession={handleEditClassSession}
-            onAddProject={handleAddProject}
-            onDeleteProject={handleDeleteProject}
-            onEditProject={handleEditProject}
-            onAddProjectSubtask={handleAddProjectSubtask}
-            onDeleteProjectSubtask={handleDeleteProjectSubtask}
-            onToggleProjectSubtask={handleToggleProjectSubtask}
+        {activeTab === 'islamic' && (
+          <IslamicTrackerView
+            city={stats.city}
+            onChangeCity={(newCity) => setStats((s) => ({ ...s, city: newCity }))}
+            namazLog={namazLog[TODAY_STR] || []}
+            quranDone={isQuranDone}
+            daroodCount={todayDaroodCount}
+            daroodDone={isDaroodDone}
+            onToggleNamaz={handleToggleNamaz}
+            onToggleQuran={handleToggleQuran}
+            onUpdateDarood={handleUpdateDarood}
+            onToggleDarood={handleToggleDarood}
           />
         )}
 
-        {activeTab === 'ai' && <AiAssistantView />}
+        {activeTab === 'habits' && (
+          <HabitsView
+            habits={habits}
+            onAddHabit={handleAddHabit}
+            onToggleHabitDay={handleToggleHabitDay}
+            onDeleteHabit={handleDeleteHabit}
+            onEditHabit={handleEditHabit}
+          />
+        )}
+
+        {(activeTab === 'self_reflection' || activeTab === 'muhasaba') && (
+          <SelfReflectionView
+            traits={traits}
+            muhasabaHistory={muhasabaHistory}
+            onAddTrait={handleAddTrait}
+            onUpdateTrait={handleUpdateTrait}
+            onDeleteTrait={handleDeleteTrait}
+            onLogPracticeOrClean={handleLogPracticeOrClean}
+            onMarkRelapseOrSlip={handleMarkRelapseOrSlip}
+            onAddMuhasabaEntry={handleAddMuhasabaEntry}
+            onDeleteMuhasabaEntry={handleDeleteMuhasabaEntry}
+          />
+        )}
 
         {activeTab === 'reports' && (
           <AnalyticsView
             tasks={tasks}
             namazLog={namazLog}
             quranLog={quranLog}
+            daroodLog={daroodLog}
             notesHistory={notesHistory}
+            muhasabaHistory={muhasabaHistory}
+            entertainmentHistory={entertainmentHistory}
             onSaveMoodNote={handleSaveMoodNote}
+            onAddMuhasabaEntry={handleAddMuhasabaEntry}
+            onDeleteMuhasabaEntry={handleDeleteMuhasabaEntry}
+            onUpdateMuhasabaEntry={handleUpdateMuhasabaEntry}
+            onLogEntertainment={handleLogEntertainment}
+            onDeleteEntertainmentEntry={handleDeleteEntertainmentEntry}
+          />
+        )}
+
+        {activeTab === 'academic' && (
+          <AcademicPlannerView
+            exams={exams}
+            projects={projects}
+            onAddExam={handleAddExam}
+            onDeleteExam={handleDeleteExam}
+            onEditExam={handleEditExam}
+            onUpdateExamPrep={handleUpdateExamPrep}
+            onAddProject={handleAddProject}
+            onDeleteProject={handleDeleteProject}
+            onEditProject={handleEditProject}
+            onAddProjectSubtask={handleAddProjectSubtask}
+            onDeleteProjectSubtask={handleDeleteProjectSubtask}
+            onToggleProjectSubtask={handleToggleProjectSubtask}
           />
         )}
       </main>

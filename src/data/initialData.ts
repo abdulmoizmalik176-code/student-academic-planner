@@ -1,242 +1,323 @@
-import { Task, Habit, Exam, Project, ClassSession, CourseGrade, UserStats } from '../types';
+import { 
+  Task, 
+  Habit, 
+  Exam, 
+  Project, 
+  ClassSession, 
+  CourseGrade, 
+  UserStats, 
+  CharacterTrait, 
+  MuhasabaEntry, 
+  EntertainmentLogEntry 
+} from '../types';
 
 export const TODAY_STR = new Date().toISOString().split('T')[0];
+export const YESTERDAY_STR = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
 export const INITIAL_TASKS: Task[] = [
   {
-    id: 't1',
-    name: 'Revise Physics Thermodynamics & Solve Ch. 4 Problems',
-    time: '10:00 AM',
+    id: 't_1',
+    name: 'Revise Computer Science Algorithms (Recursion & DP)',
+    time: '04:00 PM',
     priority: 'High',
     recurring: true,
-    note: 'Focus on Carnot engine efficiency formulas and past exam questions.',
-    doneDates: [],
-    progress: 0,
+    note: 'Chapter 4 & LeetCode problems 1 to 5',
+    doneDates: [TODAY_STR],
+    progress: 100,
     dateAdded: TODAY_STR,
-    subject: 'Physics',
+    subject: 'Computer Science',
     estimatedMinutes: 60
   },
   {
-    id: 't2',
-    name: 'Submit Linear Algebra Problem Set #3',
-    time: '02:00 PM',
+    id: 't_2',
+    name: 'Physics Numerical Practice (Wave Optics)',
+    time: '06:00 PM',
     priority: 'High',
     recurring: false,
-    note: 'Double check matrix eigenvalue proofs before submitting to portal.',
+    note: 'Solve Exercise 10 problems',
     doneDates: [],
-    progress: 0,
+    progress: 40,
     dateAdded: TODAY_STR,
-    subject: 'Mathematics',
+    subject: 'Physics',
     estimatedMinutes: 45
   },
   {
-    id: 't3',
-    name: 'Read Quran Surah Al-Kahf & Tafseer Notes',
-    time: '05:30 PM',
+    id: 't_3',
+    name: 'English Essay Writing & Grammar Drill',
+    time: '08:30 PM',
     priority: 'Medium',
     recurring: true,
-    note: 'Recite at least 10 verses with translation.',
-    doneDates: [],
-    progress: 0,
-    dateAdded: TODAY_STR,
-    subject: 'Islamic Studies',
-    estimatedMinutes: 20
-  },
-  {
-    id: 't4',
-    name: 'English Essay Outline: AI Ethics in Healthcare',
-    time: '08:00 PM',
-    priority: 'Medium',
-    recurring: false,
-    note: 'Find 3 peer-reviewed journal citations.',
+    note: 'Write 300 words on AI in Education',
     doneDates: [],
     progress: 0,
     dateAdded: TODAY_STR,
     subject: 'English',
-    estimatedMinutes: 50
+    estimatedMinutes: 30
   }
 ];
 
 export const INITIAL_HABITS: Habit[] = [
   {
-    id: 'h1',
-    name: 'Daily 2-Hour Deep Focus Study',
+    id: 'h_1',
+    name: 'Daily 1 Hour Deep Study Focus',
     color: '#6366f1',
     days: [true, true, true, true, true, true, true],
-    log: [],
+    log: [TODAY_STR, YESTERDAY_STR],
     category: 'Study'
   },
   {
-    id: 'h2',
-    name: 'Read Quran Daily',
+    id: 'h_2',
+    name: 'Surah Al-Mulk Recitation before Sleep',
     color: '#10b981',
     days: [true, true, true, true, true, true, true],
-    log: [],
+    log: [TODAY_STR, YESTERDAY_STR],
     category: 'Spiritual'
   },
   {
-    id: 'h3',
-    name: 'Drink 8 Glasses of Water',
+    id: 'h_3',
+    name: 'Drink 2.5L Water & Morning Walk',
     color: '#06b6d4',
     days: [true, true, true, true, true, true, true],
-    log: [],
+    log: [TODAY_STR],
     category: 'Health'
+  }
+];
+
+export const INITIAL_CHARACTER_TRAITS: CharacterTrait[] = [
+  {
+    id: 'trait_1',
+    title: 'Subah Fajr ke waqt bedaar hona aur Deen par pabandi',
+    type: 'good',
+    category: 'Spiritual / Deen',
+    status: 'adopting',
+    trend: 'improving',
+    daysCleanOrPracticed: 14,
+    lastUpdatedDate: TODAY_STR,
+    historyDates: [TODAY_STR, YESTERDAY_STR],
+    progressPercentage: 80,
+    notes: 'Alhamdulillah alarm sunte hi uthne ki aadat behtar ho rahi hai.',
+    replacementHabit: 'Raat ko jaldi sona'
   },
   {
-    id: 'h4',
-    name: 'Morning Math Problem Warmup',
-    color: '#f59e0b',
-    days: [true, true, true, true, true, false, false],
-    log: [],
-    category: 'Study'
+    id: 'trait_2',
+    title: 'Rozana 2 ghantay baghair phone ke concentrated study',
+    type: 'good',
+    category: 'Discipline & Study',
+    status: 'adopting',
+    trend: 'improving',
+    daysCleanOrPracticed: 9,
+    lastUpdatedDate: TODAY_STR,
+    progressPercentage: 70,
+    notes: 'Pomodoro timer use karna helpful hai.'
+  },
+  {
+    id: 'trait_3',
+    title: 'Fuzool phone scrolling aur reel watching',
+    type: 'bad',
+    category: 'Discipline & Study',
+    status: 'quitting',
+    trend: 'improving',
+    daysCleanOrPracticed: 5,
+    lastUpdatedDate: TODAY_STR,
+    progressPercentage: 65,
+    triggerOrReason: 'Bore hona ya thakan mehsoos karna',
+    replacementHabit: 'Book reading ya 10 min walk',
+    notes: 'Screen time limit app lagai hui hai.'
+  },
+  {
+    id: 'trait_4',
+    title: 'Kaam kal par taalna (Procrastination)',
+    type: 'bad',
+    category: 'Discipline & Study',
+    status: 'controlled',
+    trend: 'improving',
+    daysCleanOrPracticed: 12,
+    lastUpdatedDate: TODAY_STR,
+    progressPercentage: 75,
+    triggerOrReason: 'Mushkil assignment dekh kar darna',
+    replacementHabit: '5-Minute Rule: shuruat karna bas'
   }
 ];
 
 export const INITIAL_EXAMS: Exam[] = [
   {
-    id: 'e1',
-    subject: 'Mathematics (Calculus III)',
-    date: '2026-08-15',
+    id: 'ex_1',
+    subject: 'Computer Science Mid-Term',
+    date: new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0],
     prep: 75,
-    weight: 35,
-    syllabusNotes: 'Integration in 3D, Stokes Theorem, Green Theorem'
+    weight: 30,
+    syllabusNotes: 'Data Structures, OOP Concepts, SQL Queries'
   },
   {
-    id: 'e2',
-    subject: 'Physics II (Electromagnetism)',
-    date: '2026-08-20',
+    id: 'ex_2',
+    subject: 'Physics Semester Finals',
+    date: new Date(Date.now() + 86400000 * 14).toISOString().split('T')[0],
     prep: 50,
     weight: 40,
-    syllabusNotes: 'Gauss Law, Maxwell Equations, Circuits'
-  },
-  {
-    id: 'e3',
-    subject: 'Computer Science (Data Structures)',
-    date: '2026-08-28',
-    prep: 90,
-    weight: 30,
-    syllabusNotes: 'Trees, Graphs, Sorting Algorithms, Dynamic Programming'
+    syllabusNotes: 'Electromagnetism, Modern Physics, Thermodynamics'
   }
 ];
 
 export const INITIAL_PROJECTS: Project[] = [
   {
-    id: 'p1',
-    title: 'Science Fair Autonomous Drone Demo',
-    start: '2026-08-01',
-    end: '2026-08-25',
+    id: 'proj_1',
+    title: 'Full Stack Web App Portfolio',
+    type: 'App Development',
+    start: TODAY_STR,
+    end: new Date(Date.now() + 86400000 * 30).toISOString().split('T')[0],
     completed: false,
-    progress: 65,
-    subject: 'Robotics',
+    progress: 40,
+    subject: 'Web Dev',
+    notes: 'React, TypeScript and Tailwind frontend project with interactive dashboard',
     subtasks: [
-      { id: 'st1', title: 'Assemble quadcopter frame', done: true },
-      { id: 'st2', title: 'Calibrate flight controller sensors', done: true },
-      { id: 'st3', title: 'Test obstacle avoidance code', done: false },
-      { id: 'st4', title: 'Write final poster report', done: false }
-    ]
-  },
-  {
-    id: 'p2',
-    title: 'Student Routine Mobile Web App',
-    start: '2026-08-02',
-    end: '2026-08-30',
-    completed: false,
-    progress: 80,
-    subject: 'Web Development',
-    subtasks: [
-      { id: 'st11', title: 'Design Tailwind UI components', done: true },
-      { id: 'st12', title: 'Connect Gemini AI Study Assistant', done: true },
-      { id: 'st13', title: 'Integrate Namaz & Quran Loggers', done: true }
+      { id: 'st_1', title: 'UI Design & Wireframe', done: true },
+      { id: 'st_2', title: 'Component Architecture', done: true },
+      { id: 'st_3', title: 'Database Integration', done: false },
+      { id: 'st_4', title: 'Deployment & Testing', done: false }
     ]
   }
 ];
 
 export const INITIAL_TIMETABLE: ClassSession[] = [
-  // Monday (0)
-  { id: 'cs_m1', subject: 'Subah Namaz (Fajr) & Tilawat', startTime: '05:00 AM', endTime: '06:00 AM', dayOfWeek: 0, color: '#10b981', category: 'Namaz', notes: 'Rozana subah nimaz kay liay uthna, until 6:00 AM' },
-  { id: 'cs_m2', subject: 'Mathematics Study', startTime: '06:00 AM', endTime: '08:30 AM', dayOfWeek: 0, color: '#4f46e5', category: 'Study', notes: 'Math nashtay tk (8:30 AM)' },
-  { id: 'cs_m3', subject: 'Nashta & Business Slot 1', startTime: '08:30 AM', endTime: '09:30 AM', dayOfWeek: 0, color: '#f59e0b', category: 'Business', notes: '1h waqfa for nashta and business' },
-  { id: 'cs_m4', subject: 'Physics Study', startTime: '09:30 AM', endTime: '11:30 AM', dayOfWeek: 0, color: '#8b5cf6', category: 'Study', notes: 'Physics 9:30 say 11:30 tk' },
-  { id: 'cs_m5', subject: 'Computer Practice', startTime: '11:30 AM', endTime: '01:00 PM', dayOfWeek: 0, color: '#06b6d4', category: 'Study', notes: 'Foran computer start, 1 PM tak' },
-  { id: 'cs_m6', subject: 'Zuhr Namaz & Lunch Break', startTime: '01:00 PM', endTime: '02:30 PM', dayOfWeek: 0, color: '#ec4899', category: 'Break', notes: 'Waqfa for namaz, business & khana' },
-  { id: 'cs_m7', subject: 'Islamiat & Revision', startTime: '02:30 PM', endTime: '03:30 PM', dayOfWeek: 0, color: '#059669', category: 'Study', notes: 'Islamiat study until Asr time' },
-  { id: 'cs_m8', subject: 'Asr Namaz & Business Slot 2', startTime: '03:30 PM', endTime: '05:00 PM', dayOfWeek: 0, color: '#d97706', category: 'Business', notes: '2 say Hasar/Asr tak' },
-  { id: 'cs_m9', subject: 'Maghrib to Isha Revision', startTime: '07:15 PM', endTime: '08:30 PM', dayOfWeek: 0, color: '#2563eb', category: 'Revision', notes: 'Din ki sari revision aur mazmoon ka khulasa' },
-
-  // Wednesday (2) - MWF pattern
-  { id: 'cs_w1', subject: 'Subah Namaz (Fajr) & Tilawat', startTime: '05:00 AM', endTime: '06:00 AM', dayOfWeek: 2, color: '#10b981', category: 'Namaz', notes: 'Fajr till 6:00 AM' },
-  { id: 'cs_w2', subject: 'Mathematics Study', startTime: '06:00 AM', endTime: '08:30 AM', dayOfWeek: 2, color: '#4f46e5', category: 'Study', notes: 'Math until nashta' },
-  { id: 'cs_w3', subject: 'Nashta & Business Slot', startTime: '08:30 AM', endTime: '09:30 AM', dayOfWeek: 2, color: '#f59e0b', category: 'Business', notes: '1h waqfa for nashta and business' },
-  { id: 'cs_w4', subject: 'Physics Study', startTime: '09:30 AM', endTime: '11:30 AM', dayOfWeek: 2, color: '#8b5cf6', category: 'Study', notes: 'Physics 9:30 - 11:30 AM' },
-  { id: 'cs_w5', subject: 'Computer Practice', startTime: '11:30 AM', endTime: '01:00 PM', dayOfWeek: 2, color: '#06b6d4', category: 'Study', notes: 'Computer practice until 1 PM' },
-  { id: 'cs_w6', subject: 'Zuhr Namaz & Lunch Break', startTime: '01:00 PM', endTime: '02:30 PM', dayOfWeek: 2, color: '#ec4899', category: 'Break', notes: 'Namaz, business & khana' },
-
-  // Tuesday (1) - TTS pattern
-  { id: 'cs_t1', subject: 'Subah Namaz & Physics', startTime: '05:00 AM', endTime: '08:30 AM', dayOfWeek: 1, color: '#8b5cf6', category: 'Study', notes: 'Physics after namaz nashtay tk' },
-  { id: 'cs_t2', subject: 'Mathematics Study', startTime: '09:30 AM', endTime: '11:30 AM', dayOfWeek: 1, color: '#4f46e5', category: 'Study', notes: 'Math 9:30 to 11:30 AM' },
-  { id: 'cs_t3', subject: 'Computer Practice', startTime: '11:30 AM', endTime: '01:00 PM', dayOfWeek: 1, color: '#06b6d4', category: 'Study', notes: 'Computer 1 PM tk' },
-  { id: 'cs_t4', subject: 'Urdu Literature', startTime: '02:30 PM', endTime: '03:30 PM', dayOfWeek: 1, color: '#059669', category: 'Study', notes: 'Urdu 2:30 say 3:30 tk' },
-  { id: 'cs_t5', subject: 'English Study & Asr', startTime: '03:30 PM', endTime: '05:00 PM', dayOfWeek: 1, color: '#d97706', category: 'Study', notes: 'English phir Hasar tk' },
-
-  // Sunday (6) - Weekend Special
-  { id: 'cs_sun1', subject: 'Subah Namaz & Morning Dhikr', startTime: '05:00 AM', endTime: '06:30 AM', dayOfWeek: 6, color: '#10b981', category: 'Namaz', notes: 'Sunday morning spiritual start' },
-  { id: 'cs_sun2', subject: 'Weekly Science Subjects Revision', startTime: '09:00 AM', endTime: '12:00 PM', dayOfWeek: 6, color: '#3b82f6', category: 'Revision', notes: 'Itwar sirf science subjects ki weekly revision' }
+  {
+    id: 'tt_1',
+    subject: 'Fajr & Morning Quran Recitation',
+    startTime: '05:15 AM',
+    endTime: '06:00 AM',
+    days: [0, 1, 2, 3, 4, 5, 6],
+    color: '#10b981',
+    category: 'Namaz',
+    notes: 'Surah Yaseen / Tilawat'
+  },
+  {
+    id: 'tt_2',
+    subject: 'Mathematics & Algorithms Study',
+    startTime: '09:00 AM',
+    endTime: '11:00 AM',
+    days: [0, 1, 2, 3, 4],
+    color: '#6366f1',
+    category: 'Study',
+    notes: 'Problem solving block'
+  },
+  {
+    id: 'tt_3',
+    subject: 'Zuhr Prayer & Quick Lunch Break',
+    startTime: '01:15 PM',
+    endTime: '02:00 PM',
+    days: [0, 1, 2, 3, 4, 5, 6],
+    color: '#06b6d4',
+    category: 'Namaz'
+  },
+  {
+    id: 'tt_4',
+    subject: 'Computer Science Practical Lab',
+    startTime: '02:30 PM',
+    endTime: '04:30 PM',
+    days: [0, 2, 4],
+    color: '#8b5cf6',
+    category: 'Study',
+    notes: 'Coding and projects'
+  },
+  {
+    id: 'tt_5',
+    subject: 'Asr Prayer & Evening Walk',
+    startTime: '05:15 PM',
+    endTime: '06:00 PM',
+    days: [0, 1, 2, 3, 4, 5, 6],
+    color: '#f59e0b',
+    category: 'Personal'
+  },
+  {
+    id: 'tt_6',
+    subject: 'Maghrib, Revision & Homework',
+    startTime: '06:45 PM',
+    endTime: '08:15 PM',
+    days: [0, 1, 2, 3, 4, 5, 6],
+    color: '#ec4899',
+    category: 'Revision'
+  },
+  {
+    id: 'tt_7',
+    subject: 'Isha Prayer, Daily Muhasaba & 2hr Leisure',
+    startTime: '08:30 PM',
+    endTime: '10:30 PM',
+    days: [0, 1, 2, 3, 4, 5, 6],
+    color: '#3b82f6',
+    category: 'Break'
+  }
 ];
 
 export const INITIAL_COURSES: CourseGrade[] = [
   {
-    id: 'c1',
-    courseName: 'Calculus III',
+    id: 'c_1',
+    courseName: 'Computer Science',
     credits: 4,
     currentScore: 88,
-    targetGrade: 'A',
-    assignments: [
-      { id: 'a1', name: 'Midterm 1', score: 45, maxScore: 50, weight: 25 },
-      { id: 'a2', name: 'Quiz 1', score: 19, maxScore: 20, weight: 10 },
-      { id: 'a3', name: 'Homework 1-3', score: 28, maxScore: 30, weight: 15 }
-    ]
-  },
-  {
-    id: 'c2',
-    courseName: 'Physics II',
-    credits: 3,
-    currentScore: 82,
-    targetGrade: 'A-',
-    assignments: [
-      { id: 'a4', name: 'Lab Reports', score: 85, maxScore: 100, weight: 20 },
-      { id: 'a5', name: 'Midterm Exam', score: 78, maxScore: 100, weight: 30 }
-    ]
-  },
-  {
-    id: 'c3',
-    courseName: 'Data Structures',
-    credits: 4,
-    currentScore: 94,
     targetGrade: 'A+',
     assignments: [
-      { id: 'a6', name: 'Coding Project 1', score: 100, maxScore: 100, weight: 20 },
-      { id: 'a7', name: 'Quiz 1', score: 10, maxScore: 10, weight: 10 }
+      { id: 'a_1', name: 'Assignment 1', score: 95, maxScore: 100, weight: 10 },
+      { id: 'a_2', name: 'Mid Term Exam', score: 85, maxScore: 100, weight: 30 }
+    ]
+  },
+  {
+    id: 'c_2',
+    courseName: 'Applied Physics',
+    credits: 3,
+    currentScore: 82,
+    targetGrade: 'A',
+    assignments: [
+      { id: 'a_3', name: 'Lab Report', score: 90, maxScore: 100, weight: 15 },
+      { id: 'a_4', name: 'Quiz 1 & 2', score: 78, maxScore: 100, weight: 20 }
     ]
   }
 ];
 
+export const INITIAL_MUHASABA_HISTORY: MuhasabaEntry[] = [
+  {
+    id: 'muh_1',
+    date: TODAY_STR,
+    time: '09:30 PM',
+    mood: 'Productive',
+    note: 'Alhamdulillah aaj ka din bohat mutmaen guzra. Subah waqt par utha aur namaz aur routine follow ki.',
+    goodHabitAdopted: 'Subah Fajr ke baad 1 ghanta focus study kia',
+    badHabitAvoided: 'Mobile phone reels scrolling par control rakha',
+    daroodCount: 100,
+    tags: ['Daily Muhasaba', 'Productive']
+  }
+];
+
+export const INITIAL_ENTERTAINMENT_HISTORY: EntertainmentLogEntry[] = [
+  {
+    id: 'ent_1',
+    date: TODAY_STR,
+    status: 'enjoyed',
+    minutesUsed: 60,
+    activityNote: 'Gaming and tech documentary after completing study targets',
+    unlockedTime: '08:30 PM',
+    prayersCount: 5,
+    tasksCompletedCount: 3
+  }
+];
+
 export const INITIAL_USER_STATS: UserStats = {
-  points: 50,
+  xp: 350,
   level: 1,
-  badges: ['Level 1 Student'],
-  streak: 1,
+  streak: 3,
   dark_mode: true,
   city: 'Islamabad',
   entTimerRunning: false,
-  entTimeLeft: 7200,
-  waterGlasses: 0
+  entTimeLeft: 7200, // 2 hours
+  waterGlasses: 4
 };
 
-export const NAMAZ_SCHEDULE: Record<string, { Fajr: string; Zuhr: string; Asr: string; Maghrib: string; Isha: string }> = {
-  Islamabad: { Fajr: "04:15", Zuhr: "12:18", Asr: "04:55", Maghrib: "07:12", Isha: "08:42" },
-  Karachi: { Fajr: "04:45", Zuhr: "12:32", Asr: "05:02", Maghrib: "07:18", Isha: "08:38" },
-  Lahore: { Fajr: "04:10", Zuhr: "12:14", Asr: "04:50", Maghrib: "07:08", Isha: "08:38" },
-  London: { Fajr: "03:45", Zuhr: "01:08", Asr: "05:15", Maghrib: "08:45", Isha: "10:15" },
-  NewYork: { Fajr: "04:30", Zuhr: "01:02", Asr: "04:58", Maghrib: "08:12", Isha: "09:40" },
-  Riyadh: { Fajr: "03:55", Zuhr: "11:58", Asr: "03:22", Maghrib: "06:38", Isha: "08:08" }
+export const NAMAZ_SCHEDULE: Record<string, Record<string, string>> = {
+  Islamabad: { Fajr: '05:00 AM', Zuhr: '01:15 PM', Asr: '05:15 PM', Maghrib: '06:45 PM', Isha: '08:15 PM' },
+  Lahore: { Fajr: '04:55 AM', Zuhr: '01:10 PM', Asr: '05:10 PM', Maghrib: '06:40 PM', Isha: '08:10 PM' },
+  Karachi: { Fajr: '05:25 AM', Zuhr: '01:30 PM', Asr: '05:30 PM', Maghrib: '07:05 PM', Isha: '08:35 PM' },
+  Rawalpindi: { Fajr: '05:00 AM', Zuhr: '01:15 PM', Asr: '05:15 PM', Maghrib: '06:45 PM', Isha: '08:15 PM' },
+  Peshawar: { Fajr: '05:05 AM', Zuhr: '01:20 PM', Asr: '05:20 PM', Maghrib: '06:50 PM', Isha: '08:20 PM' },
+  Quetta: { Fajr: '05:15 AM', Zuhr: '01:25 PM', Asr: '05:25 PM', Maghrib: '06:55 PM', Isha: '08:25 PM' },
+  Multan: { Fajr: '05:08 AM', Zuhr: '01:18 PM', Asr: '05:18 PM', Maghrib: '06:48 PM', Isha: '08:18 PM' },
+  Faisalabad: { Fajr: '05:02 AM', Zuhr: '01:12 PM', Asr: '05:12 PM', Maghrib: '06:42 PM', Isha: '08:12 PM' },
 };
+
